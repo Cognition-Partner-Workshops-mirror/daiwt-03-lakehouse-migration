@@ -32,16 +32,272 @@ resources:
           job_id: ${resources.jobs.silver_pipeline.id}
           job_parameters:
             drop: '{{job.parameters.drop}}'
+      - task_key: silver_campaign_touches
+        depends_on:
+        - task_key: silver_asof
+        - task_key: silver_pipeline
+        run_job_task:
+          job_id: ${resources.jobs.silver_campaign_touches.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: attribution
+        depends_on:
+        - task_key: silver_campaign_touches
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.attribution.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: silver_customers
+        depends_on:
+        - task_key: silver_asof
+        - task_key: silver_pipeline
+        run_job_task:
+          job_id: ${resources.jobs.silver_customers.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: silver_order_items
+        depends_on:
+        - task_key: silver_asof
+        - task_key: silver_pipeline
+        run_job_task:
+          job_id: ${resources.jobs.silver_order_items.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: silver_orders
+        depends_on:
+        - task_key: silver_asof
+        - task_key: silver_pipeline
+        run_job_task:
+          job_id: ${resources.jobs.silver_orders.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: churn_flags
+        depends_on:
+        - task_key: silver_customers
+        - task_key: silver_orders
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.churn_flags.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: cohort_retention
+        depends_on:
+        - task_key: silver_orders
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.cohort_retention.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: daily_revenue
+        depends_on:
+        - task_key: silver_order_items
+        - task_key: silver_orders
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.daily_revenue.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: promo_lift
+        depends_on:
+        - task_key: silver_order_items
+        - task_key: silver_orders
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.promo_lift.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: rfm_segments
+        depends_on:
+        - task_key: silver_customers
+        - task_key: silver_order_items
+        - task_key: silver_orders
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.rfm_segments.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: silver_payments
+        depends_on:
+        - task_key: silver_asof
+        - task_key: silver_pipeline
+        run_job_task:
+          job_id: ${resources.jobs.silver_payments.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: payment_mix
+        depends_on:
+        - task_key: silver_payments
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.payment_mix.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: silver_products
+        depends_on:
+        - task_key: silver_asof
+        - task_key: silver_pipeline
+        run_job_task:
+          job_id: ${resources.jobs.silver_products.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: basket_affinity
+        depends_on:
+        - task_key: silver_order_items
+        - task_key: silver_products
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.basket_affinity.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: category_mix
+        depends_on:
+        - task_key: silver_order_items
+        - task_key: silver_products
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.category_mix.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: inventory_snapshot
+        depends_on:
+        - task_key: silver_order_items
+        - task_key: silver_products
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.inventory_snapshot.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: silver_returns
+        depends_on:
+        - task_key: silver_asof
+        - task_key: silver_pipeline
+        run_job_task:
+          job_id: ${resources.jobs.silver_returns.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: returns_rate
+        depends_on:
+        - task_key: silver_order_items
+        - task_key: silver_products
+        - task_key: silver_returns
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.returns_rate.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: silver_shipments
+        depends_on:
+        - task_key: silver_asof
+        - task_key: silver_pipeline
+        run_job_task:
+          job_id: ${resources.jobs.silver_shipments.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: shipping_sla
+        depends_on:
+        - task_key: silver_shipments
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.shipping_sla.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: silver_stores
+        depends_on:
+        - task_key: silver_asof
+        - task_key: silver_pipeline
+        run_job_task:
+          job_id: ${resources.jobs.silver_stores.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: geo_rollup
+        depends_on:
+        - task_key: silver_order_items
+        - task_key: silver_orders
+        - task_key: silver_stores
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.geo_rollup.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: product_perf
+        depends_on:
+        - task_key: silver_order_items
+        - task_key: silver_orders
+        - task_key: silver_products
+        - task_key: silver_stores
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.product_perf.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: silver_web_events
+        depends_on:
+        - task_key: silver_asof
+        - task_key: silver_pipeline
+        run_job_task:
+          job_id: ${resources.jobs.silver_web_events.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: sessionization
+        depends_on:
+        - task_key: silver_web_events
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.sessionization.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
       - task_key: sql_macros
         run_job_task:
           job_id: ${resources.jobs.sql_macros.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: customer_ltv
+        depends_on:
+        - task_key: silver_customers
+        - task_key: silver_order_items
+        - task_key: silver_orders
+        - task_key: sql_macros
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.customer_ltv.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: finance_export
+        depends_on:
+        - task_key: silver_order_items
+        - task_key: silver_orders
+        - task_key: sql_macros
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.finance_export.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: store_weekly
+        depends_on:
+        - task_key: silver_order_items
+        - task_key: silver_orders
+        - task_key: silver_stores
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.store_weekly.id}
           job_parameters:
             drop: '{{job.parameters.drop}}'
       - task_key: verify_silver
         depends_on:
         - task_key: bronze_landing
         - task_key: silver_asof
+        - task_key: silver_campaign_touches
+        - task_key: silver_customers
+        - task_key: silver_order_items
+        - task_key: silver_orders
+        - task_key: silver_payments
         - task_key: silver_pipeline
+        - task_key: silver_products
+        - task_key: silver_returns
+        - task_key: silver_shipments
+        - task_key: silver_stores
+        - task_key: silver_web_events
         - task_key: sql_macros
         notebook_task:
           notebook_path: ../src/modernization/gate_task.py
@@ -55,14 +311,330 @@ resources:
             drop: '{{job.parameters.drop}}'
             mode: silver
             unit: ''
+      - task_key: publish_attribution
+        depends_on:
+        - task_key: attribution
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: attribution
+      - task_key: publish_churn_flags
+        depends_on:
+        - task_key: churn_flags
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: churn_flags
+      - task_key: publish_cohort_retention
+        depends_on:
+        - task_key: cohort_retention
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: cohort_retention
+      - task_key: publish_daily_revenue
+        depends_on:
+        - task_key: daily_revenue
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: daily_revenue
+      - task_key: publish_promo_lift
+        depends_on:
+        - task_key: promo_lift
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: promo_lift
+      - task_key: publish_rfm_segments
+        depends_on:
+        - task_key: rfm_segments
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: rfm_segments
+      - task_key: publish_payment_mix
+        depends_on:
+        - task_key: payment_mix
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: payment_mix
+      - task_key: publish_basket_affinity
+        depends_on:
+        - task_key: basket_affinity
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: basket_affinity
+      - task_key: publish_category_mix
+        depends_on:
+        - task_key: category_mix
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: category_mix
+      - task_key: publish_inventory_snapshot
+        depends_on:
+        - task_key: inventory_snapshot
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: inventory_snapshot
+      - task_key: publish_returns_rate
+        depends_on:
+        - task_key: returns_rate
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: returns_rate
+      - task_key: publish_shipping_sla
+        depends_on:
+        - task_key: shipping_sla
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: shipping_sla
+      - task_key: publish_geo_rollup
+        depends_on:
+        - task_key: geo_rollup
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: geo_rollup
+      - task_key: publish_product_perf
+        depends_on:
+        - task_key: product_perf
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: product_perf
+      - task_key: publish_sessionization
+        depends_on:
+        - task_key: sessionization
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: sessionization
+      - task_key: publish_customer_ltv
+        depends_on:
+        - task_key: customer_ltv
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: customer_ltv
+      - task_key: publish_finance_export
+        depends_on:
+        - task_key: finance_export
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: finance_export
+      - task_key: publish_store_weekly
+        depends_on:
+        - task_key: store_weekly
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: store_weekly
       - task_key: governance
         run_if: NONE_FAILED
         depends_on:
         - task_key: bronze_landing
         - task_key: silver_asof
         - task_key: silver_pipeline
+        - task_key: silver_campaign_touches
+        - task_key: attribution
+        - task_key: silver_customers
+        - task_key: silver_order_items
+        - task_key: silver_orders
+        - task_key: churn_flags
+        - task_key: cohort_retention
+        - task_key: daily_revenue
+        - task_key: promo_lift
+        - task_key: rfm_segments
+        - task_key: silver_payments
+        - task_key: payment_mix
+        - task_key: silver_products
+        - task_key: basket_affinity
+        - task_key: category_mix
+        - task_key: inventory_snapshot
+        - task_key: silver_returns
+        - task_key: returns_rate
+        - task_key: silver_shipments
+        - task_key: shipping_sla
+        - task_key: silver_stores
+        - task_key: geo_rollup
+        - task_key: product_perf
+        - task_key: silver_web_events
+        - task_key: sessionization
         - task_key: sql_macros
+        - task_key: customer_ltv
+        - task_key: finance_export
+        - task_key: store_weekly
         - task_key: verify_silver
+        - task_key: publish_attribution
+        - task_key: publish_churn_flags
+        - task_key: publish_cohort_retention
+        - task_key: publish_daily_revenue
+        - task_key: publish_promo_lift
+        - task_key: publish_rfm_segments
+        - task_key: publish_payment_mix
+        - task_key: publish_basket_affinity
+        - task_key: publish_category_mix
+        - task_key: publish_inventory_snapshot
+        - task_key: publish_returns_rate
+        - task_key: publish_shipping_sla
+        - task_key: publish_geo_rollup
+        - task_key: publish_product_perf
+        - task_key: publish_sessionization
+        - task_key: publish_customer_ltv
+        - task_key: publish_finance_export
+        - task_key: publish_store_weekly
         run_job_task:
           job_id: ${resources.jobs.governance.id}
           job_parameters:

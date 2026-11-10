@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -5,7 +6,7 @@ import yaml
 
 from modernization_dag import DESTINATION, bundle_resources, generate, render
 from modernization import gates
-from registry import load
+from registry import load, topo_order
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -16,6 +17,40 @@ def spec(job, outputs=(), owns=(), deps=()):
 
 def test_committed_dag_matches_registry():
     assert (ROOT / DESTINATION).read_text() == render(ROOT)
+
+
+def test_all_registered_gold_outputs_have_ordered_publication_gates():
+    registry = load(ROOT)
+    contract = json.loads((ROOT / 'src/parity/contract.json').read_text())
+    contract_gold = {entry['table'] for entry in contract['outputs'] if entry['table'].startswith('gold.')}
+    producers = {unit for unit, entry in registry.items() if contract_gold.intersection(entry['outputs'])}
+    tasks = {task['task_key']: task for task in yaml.safe_load(render(ROOT))['resources']['jobs']['modernization']['tasks']}
+    publish = {'publish_' + unit for unit in producers}
+    assert {key for key in tasks if key.startswith('publish_')} == publish
+    assert publish <= {dep['task_key'] for dep in tasks['governance']['depends_on']}
+    graph = {key: {'depends_on': [dep['task_key'] for dep in task.get('depends_on', [])]}
+             for key, task in tasks.items()}
+    order = topo_order(graph, '*')
+    assert order[-1] == 'governance'
+    for unit in producers:
+        gate = tasks['publish_' + unit]
+        assert gate['depends_on'] == [{'task_key': unit}]
+        assert gate['notebook_task']['base_parameters']['unit'] == unit
+        assert gate['notebook_task']['base_parameters']['mode'] == 'publish'
+        assert order.index('verify_silver') < order.index(unit) < order.index('publish_' + unit) < order.index('governance')
+    unit_tasks = {key for key, task in tasks.items() if 'run_job_task' in task or 'pipeline_task' in task}
+    assert len(tasks) == len(unit_tasks) + len(producers) + 1
+    assert {key for key, task in tasks.items() if 'notebook_task' in task} == publish | {'verify_silver'}
+    for dependency in graph['verify_silver']['depends_on']:
+        assert order.index(dependency) < order.index('verify_silver')
+
+
+def test_no_standalone_unit_job_schedules():
+    for path in (ROOT / 'src/sql/units').glob('*/*.yml'):
+        document = yaml.safe_load(path.read_text()) or {}
+        for scope in [document, *document.get('targets', {}).values()]:
+            for key, job in scope.get('resources', {}).get('jobs', {}).items():
+                assert 'schedule' not in job, f'{path}: {key} has a standalone schedule'
 
 
 def test_generic_jobs_pipeline_and_gates():
