@@ -1,0 +1,1 @@
+{"job":"silver_order_items","legacy_unit":"foundation","outputs":["silver.order_items"],"owns":["silver.order_items_quarantine"],"depends_on":["silver_pipeline","silver_asof"]}

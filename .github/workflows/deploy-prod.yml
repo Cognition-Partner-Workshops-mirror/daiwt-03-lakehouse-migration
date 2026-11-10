@@ -24,6 +24,8 @@ jobs:
           python-version: "3.11"
       - run: pip install -r requirements-dev.txt
       - uses: databricks/setup-cli@main
+        with:
+          version: 1.25.0
       - run: databricks bundle validate --strict -t prod
       - run: databricks bundle deploy -t prod
       - name: Replay production drops

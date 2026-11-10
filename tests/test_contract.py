@@ -114,6 +114,31 @@ def test_registered_unit_compares_table_and_report(monkeypatch, catalog, schema)
     assert "`report_daily_revenue`" in queries[1]
 
 
+@pytest.mark.parametrize("catalog,suffix", [
+    ("daiwt_03_mig_dev", "_pr_1"), ("daiwt_03_mig_prod", "")])
+@pytest.mark.parametrize("rows", [[], [[None]]])
+@pytest.mark.parametrize("table,projection", [
+    ("silver.orders", "`order_id`, `customer_id`, `store_id`, "
+     "date_format(`order_ts`, 'yyyy-MM-dd HH:mm:ss') AS `order_ts`, `sales_channel`, `status`"),
+    ("gold.web_sessions", "`customer_id`, `session_id`, "
+     "date_format(`session_start_ts`, 'yyyy-MM-dd HH:mm:ss') AS `session_start_ts`, "
+     "date_format(`session_end_ts`, 'yyyy-MM-dd HH:mm:ss') AS `session_end_ts`, `event_count`, `checkout_events`"),
+    ("silver.stores", "`store_id`, `region`, `store_name`, `city`, `state`"),
+])
+def test_timestamp_select_projection(monkeypatch, catalog, suffix, rows, table, projection):
+    entry = next(entry for entry in CONTRACT["outputs"] if entry["table"] == table)
+    queries = []
+    monkeypatch.setattr(GoldenStore, "rows", lambda *_: rows)
+    monkeypatch.setattr(Warehouse, "sql", lambda _, query: queries.append(query) or rows)
+    registry = {"entity": dict(job="entity", legacy_unit=entry["unit"],
+                               outputs=[table], owns=[], depends_on=[])}
+    result = run(client(MANIFEST), catalog, "pr_1", "w", registry)
+    layer, name = table.split(".")
+    assert queries == [f"SELECT {projection} FROM `{catalog}`.`{layer}{suffix}`.`{name}`"]
+    assert result["status"] == "PASS"
+    assert result["compared"] == 1
+
+
 @pytest.mark.parametrize("catalog,compared,reason", [
     ("daiwt_03_mig_dev", 0, "not selected"),
     ("daiwt_03_mig_prod", 2, "matched")])
