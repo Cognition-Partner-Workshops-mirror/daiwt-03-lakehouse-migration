@@ -1,0 +1,2493 @@
+{
+  "source": {
+    "engine": "Amazon Redshift Serverless",
+    "version": "PostgreSQL 8.0.2 on i686-pc-linux-gnu, compiled by GCC gcc (GCC) 3.4.2 20041017 (Red Hat 3.4.2-6.fc3), Redshift 1.0.535482",
+    "timezone": "UTC",
+    "search_path": "$user, public",
+    "workgroup": "daiwt-03-retail",
+    "namespace": "daiwt-03-retail",
+    "region": "us-east-1",
+    "database": "daiwt_03_retail",
+    "schemas": [
+      "core",
+      "mart"
+    ],
+    "tables": [
+      {
+        "table": "core.campaign_touches",
+        "row_count": 8000
+      },
+      {
+        "table": "core.customers",
+        "row_count": 1500
+      },
+      {
+        "table": "core.order_items",
+        "row_count": 40938
+      },
+      {
+        "table": "core.orders",
+        "row_count": 20000
+      },
+      {
+        "table": "core.payments",
+        "row_count": 20000
+      },
+      {
+        "table": "core.products",
+        "row_count": 300
+      },
+      {
+        "table": "core.returns",
+        "row_count": 2518
+      },
+      {
+        "table": "core.shipments",
+        "row_count": 12817
+      },
+      {
+        "table": "core.stores",
+        "row_count": 40
+      },
+      {
+        "table": "core.web_events",
+        "row_count": 25000
+      },
+      {
+        "table": "mart.attribution",
+        "row_count": 100
+      },
+      {
+        "table": "mart.basket_affinity",
+        "row_count": 50
+      },
+      {
+        "table": "mart.category_mix",
+        "row_count": 6
+      },
+      {
+        "table": "mart.churn_flags",
+        "row_count": 1500
+      },
+      {
+        "table": "mart.cohort_retention",
+        "row_count": 65
+      },
+      {
+        "table": "mart.customer_ltv",
+        "row_count": 1500
+      },
+      {
+        "table": "mart.daily_revenue",
+        "row_count": 1460
+      },
+      {
+        "table": "mart.exec_summary",
+        "row_count": 1
+      },
+      {
+        "table": "mart.finance_monthly",
+        "row_count": 12
+      },
+      {
+        "table": "mart.geo_rollup",
+        "row_count": 21
+      },
+      {
+        "table": "mart.inventory_snapshot",
+        "row_count": 300
+      },
+      {
+        "table": "mart.payment_mix",
+        "row_count": 5
+      },
+      {
+        "table": "mart.product_perf",
+        "row_count": 300
+      },
+      {
+        "table": "mart.promo_lift",
+        "row_count": 4
+      },
+      {
+        "table": "mart.returns_rate",
+        "row_count": 6
+      },
+      {
+        "table": "mart.rfm_segments",
+        "row_count": 1500
+      },
+      {
+        "table": "mart.shipping_sla",
+        "row_count": 4
+      },
+      {
+        "table": "mart.store_weekly",
+        "row_count": 2120
+      },
+      {
+        "table": "mart.web_sessions",
+        "row_count": 21280
+      }
+    ],
+    "routines": [
+      [
+        "public",
+        "f_clean_phone"
+      ],
+      [
+        "public",
+        "f_fiscal_qtr"
+      ],
+      [
+        "public",
+        "sp_build_churn_flags"
+      ],
+      [
+        "public",
+        "sp_upsert_inventory"
+      ]
+    ],
+    "legacy_repo": "https://github.com/Cognition-Partner-Workshops-mirror/daiwt-03-redshift.git",
+    "legacy_commit": "1bee48ad399b81b9764d5ac9a0e3f30fad0fd22a",
+    "legacy_command": "make legacy-all == python tools/source_connection.py all",
+    "legacy_sessions": [
+      {
+        "session_id": "d320ad82-532d-4c10-a2e5-c30ded0a17ea",
+        "timezone": "UTC"
+      },
+      {
+        "session_id": "c2c0a845-cb0a-4b5d-90d5-f568632a7322",
+        "timezone": "UTC"
+      },
+      {
+        "session_id": "4dc34381-86ad-4558-b4fe-aee2cb4e1c3a",
+        "timezone": "UTC"
+      },
+      {
+        "session_id": "cbfc5311-cd42-45c8-aede-0fcd0a3fd947",
+        "timezone": "UTC"
+      }
+    ],
+    "legacy_start": "2026-11-10T14:24:54Z",
+    "legacy_end": "2026-11-10T14:43:05Z",
+    "legacy_run_note": "Legacy runner completed (setup, build, capture, 'done'); the original ad-hoc launcher exited 1 afterwards while writing sessions.json (relative path after chdir); sessions.json reconstructed from the launcher's per-session timezone log lines."
+  },
+  "capture_mode": "legacy_run",
+  "captured_at_utc": "2026-11-10T14:24:33Z",
+  "session_timezone": "UTC",
+  "drops": [
+    "D0"
+  ],
+  "drops_reason": "seed generator anchored to 2025-12-31; setup drops and reloads core from committed seed CSVs; full-reload ETL, no incremental loads",
+  "batch_semantics": "D0 full reload from the legacy commit's fixed seed; no incremental drops",
+  "csv_conventions": {
+    "self_exported": {
+      "encoding": "UTF-8",
+      "header": "lowercase",
+      "line_endings": "LF",
+      "quoting": "RFC4180",
+      "null": "\\N",
+      "numeric": "Redshift string, never float",
+      "float": "Python shortest round-trip repr",
+      "boolean": "true/false",
+      "timestamp": "YYYY-MM-DD HH:MM:SS[.ffffff]",
+      "timestamptz": "UTC +00:00",
+      "date": "YYYY-MM-DD",
+      "char": "padding preserved",
+      "super": "JSON_SERIALIZE",
+      "varbyte": "hex",
+      "ordering": "SQL ORDER BY full unique key, LIMIT/OFFSET plus Data API NextToken paging"
+    },
+    "reused_legacy": {
+      "encoding": "UTF-8",
+      "header": "lowercase",
+      "line_endings": "LF",
+      "quoting": "RFC4180",
+      "null": "\\N",
+      "rendering": "legacy renderCell: fixed-point Decimal, repr(float), true/false, datetime.isoformat, other str; UTC sessions; CHAR unchanged"
+    }
+  },
+  "nondeterministic_columns": [],
+  "skipped_branches": [
+    {
+      "unit": "finance_export",
+      "path": "legacy/redshift/units/finance_export/export.sql",
+      "reason": "capture_skip; UNLOAD destination and IAM role are placeholders; not run by cmdBuild"
+    },
+    {
+      "unit": "orchestration",
+      "path": "legacy/redshift/99_orchestration/refresh_schedule.yaml",
+      "reason": "capture_skip; scheduler specification, not installed; load_core uses unsupported --ddl-only; finance_export step not run by cmdBuild"
+    }
+  ],
+  "format_exceptions": [
+    "Reused legacy capture uses SELECT * then Python sort on rendered key strings with NULL->empty string; verified unique keys and strict total order. Files copied byte-for-byte."
+  ],
+  "files": [
+    {
+      "sha256": "dafc9b662969449fc25561cd6cb2629bc25f61c7eb88aa11f28a2abe2f81cb78",
+      "row_count": 1500,
+      "columns": [
+        {
+          "name": "customer_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "email",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "first_name",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "last_name",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "phone",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "region",
+          "redshift_type": "bpchar"
+        },
+        {
+          "name": "preferred_store_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "signup_date",
+          "redshift_type": "date"
+        },
+        {
+          "name": "is_business",
+          "redshift_type": "bool"
+        }
+      ],
+      "keys": [
+        "customer_id"
+      ],
+      "source_table": "core.customers",
+      "reused_from_legacy_run": false,
+      "matches_committed_golden": null,
+      "path": "inputs/D0/core.customers.csv"
+    },
+    {
+      "sha256": "c4b93bcafa434103e8bcedfc45f7ee20bbfbdb2dd9ccbb1703928518e029acdc",
+      "row_count": 40,
+      "columns": [
+        {
+          "name": "store_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "region",
+          "redshift_type": "bpchar"
+        },
+        {
+          "name": "store_name",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "city",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "state",
+          "redshift_type": "varchar"
+        }
+      ],
+      "keys": [
+        "store_id"
+      ],
+      "source_table": "core.stores",
+      "reused_from_legacy_run": false,
+      "matches_committed_golden": null,
+      "path": "inputs/D0/core.stores.csv"
+    },
+    {
+      "sha256": "4d8ea2814cd6c827a1d52d7a7e348718bf57977a34d476a2070a0d9bff55084b",
+      "row_count": 300,
+      "columns": [
+        {
+          "name": "product_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "sku",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "product_name",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "category",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "subcategory",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "unit_price",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "cost",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "active",
+          "redshift_type": "bool"
+        }
+      ],
+      "keys": [
+        "product_id"
+      ],
+      "source_table": "core.products",
+      "reused_from_legacy_run": false,
+      "matches_committed_golden": null,
+      "path": "inputs/D0/core.products.csv"
+    },
+    {
+      "sha256": "dcd00c85d6226e38ca123ef10da750bbe8792e9c412bd62766861f0c7621f3a9",
+      "row_count": 20000,
+      "columns": [
+        {
+          "name": "order_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "customer_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "store_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "order_ts",
+          "redshift_type": "timestamp"
+        },
+        {
+          "name": "sales_channel",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "status",
+          "redshift_type": "varchar"
+        }
+      ],
+      "keys": [
+        "order_id"
+      ],
+      "source_table": "core.orders",
+      "reused_from_legacy_run": false,
+      "matches_committed_golden": null,
+      "path": "inputs/D0/core.orders.csv"
+    },
+    {
+      "sha256": "5c99ec986aba56fc811e6c4653edde2f466c079194c2d2d02103654c239bd39b",
+      "row_count": 40938,
+      "columns": [
+        {
+          "name": "order_item_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "order_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "product_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "quantity",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "unit_price",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "discount",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "order_item_id"
+      ],
+      "source_table": "core.order_items",
+      "reused_from_legacy_run": false,
+      "matches_committed_golden": null,
+      "path": "inputs/D0/core.order_items.csv"
+    },
+    {
+      "sha256": "afcecefefce5f1503b985bfb4eddfdd8fc9b1602a50da8ad096a10b79c1a4873",
+      "row_count": 20000,
+      "columns": [
+        {
+          "name": "payment_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "order_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "method",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "amount",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "paid_ts",
+          "redshift_type": "timestamp"
+        }
+      ],
+      "keys": [
+        "payment_id"
+      ],
+      "source_table": "core.payments",
+      "reused_from_legacy_run": false,
+      "matches_committed_golden": null,
+      "path": "inputs/D0/core.payments.csv"
+    },
+    {
+      "sha256": "3016e83db92c4a407accfa5eff724d6883e8d440e2674ae00e5ed56aba1fc7c4",
+      "row_count": 2518,
+      "columns": [
+        {
+          "name": "return_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "order_item_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "quantity",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "reason",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "returned_ts",
+          "redshift_type": "timestamp"
+        }
+      ],
+      "keys": [
+        "return_id"
+      ],
+      "source_table": "core.returns",
+      "reused_from_legacy_run": false,
+      "matches_committed_golden": null,
+      "path": "inputs/D0/core.returns.csv"
+    },
+    {
+      "sha256": "6ff7adb0bf7171a28966e8c8d244bcd9c119c155ac14ff14a9235fd1989c3445",
+      "row_count": 12817,
+      "columns": [
+        {
+          "name": "shipment_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "order_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "carrier",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "ship_ts",
+          "redshift_type": "timestamp"
+        },
+        {
+          "name": "delivered_ts",
+          "redshift_type": "timestamp"
+        }
+      ],
+      "keys": [
+        "shipment_id"
+      ],
+      "source_table": "core.shipments",
+      "reused_from_legacy_run": false,
+      "matches_committed_golden": null,
+      "path": "inputs/D0/core.shipments.csv"
+    },
+    {
+      "sha256": "71d6edb3561cd7c11c60fb2647b7091df2bc6d946b9c8409563f63a925a4f41e",
+      "row_count": 25000,
+      "columns": [
+        {
+          "name": "event_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "customer_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "event_ts",
+          "redshift_type": "timestamp"
+        },
+        {
+          "name": "event_type",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "page_url",
+          "redshift_type": "varchar"
+        }
+      ],
+      "keys": [
+        "event_id"
+      ],
+      "source_table": "core.web_events",
+      "reused_from_legacy_run": false,
+      "matches_committed_golden": null,
+      "path": "inputs/D0/core.web_events.csv"
+    },
+    {
+      "sha256": "dcf89294c68faa09c4bc38863b74ad4bc42a5b62659b4c2fd6729c19f0b7d02b",
+      "row_count": 8000,
+      "columns": [
+        {
+          "name": "touch_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "customer_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "payload",
+          "redshift_type": "super"
+        }
+      ],
+      "keys": [
+        "touch_id"
+      ],
+      "source_table": "core.campaign_touches",
+      "reused_from_legacy_run": false,
+      "matches_committed_golden": null,
+      "path": "inputs/D0/core.campaign_touches.csv"
+    },
+    {
+      "path": "outputs/D0/foundation/customers.csv",
+      "sha256": "4c1f405b08248c61fb782939c043bc8caee6ab860475ccce870927813a98cb15",
+      "row_count": 1500,
+      "columns": [
+        {
+          "name": "customer_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "email",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "first_name",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "last_name",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "phone",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "region",
+          "redshift_type": "bpchar"
+        },
+        {
+          "name": "preferred_store_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "signup_date",
+          "redshift_type": "date"
+        },
+        {
+          "name": "is_business",
+          "redshift_type": "bool"
+        }
+      ],
+      "keys": [
+        "customer_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "core.customers"
+    },
+    {
+      "path": "outputs/D0/foundation/stores.csv",
+      "sha256": "d5c08e703e8797c890fdd6348e2dd0b09866b6612e2be20115d4e7a503e9b660",
+      "row_count": 40,
+      "columns": [
+        {
+          "name": "store_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "region",
+          "redshift_type": "bpchar"
+        },
+        {
+          "name": "store_name",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "city",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "state",
+          "redshift_type": "varchar"
+        }
+      ],
+      "keys": [
+        "store_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "core.stores"
+    },
+    {
+      "path": "outputs/D0/foundation/products.csv",
+      "sha256": "fde4bf084b78ef9c6bba0ebc956dc35cd5a32f5aab42a9b4446c3e21c3261520",
+      "row_count": 300,
+      "columns": [
+        {
+          "name": "product_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "sku",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "product_name",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "category",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "subcategory",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "unit_price",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "cost",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "active",
+          "redshift_type": "bool"
+        }
+      ],
+      "keys": [
+        "product_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "core.products"
+    },
+    {
+      "path": "outputs/D0/foundation/orders.csv",
+      "sha256": "9c1b8471231e5dec85bd3cb3e467475a35d3df7a9d50569b5ff12ee1b97240a9",
+      "row_count": 20000,
+      "columns": [
+        {
+          "name": "order_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "customer_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "store_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "order_ts",
+          "redshift_type": "timestamp"
+        },
+        {
+          "name": "sales_channel",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "status",
+          "redshift_type": "varchar"
+        }
+      ],
+      "keys": [
+        "order_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "core.orders"
+    },
+    {
+      "path": "outputs/D0/foundation/order_items.csv",
+      "sha256": "2f4b8d760b2555ae9c7b38a6fdc00e7a8f4a0b145460ddf52c51f334f9fce729",
+      "row_count": 40938,
+      "columns": [
+        {
+          "name": "order_item_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "order_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "product_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "quantity",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "unit_price",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "discount",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "order_item_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "core.order_items"
+    },
+    {
+      "path": "outputs/D0/foundation/payments.csv",
+      "sha256": "9315d296857f1e3cbc6968602667006e96b47d58740a3778791c21d713f7c565",
+      "row_count": 20000,
+      "columns": [
+        {
+          "name": "payment_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "order_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "method",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "amount",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "paid_ts",
+          "redshift_type": "timestamp"
+        }
+      ],
+      "keys": [
+        "payment_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "core.payments"
+    },
+    {
+      "path": "outputs/D0/foundation/returns.csv",
+      "sha256": "2c17cccc41e6b9039d765e9113b2dca97a27443ca6c3f33b4998679fcadd8628",
+      "row_count": 2518,
+      "columns": [
+        {
+          "name": "return_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "order_item_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "quantity",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "reason",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "returned_ts",
+          "redshift_type": "timestamp"
+        }
+      ],
+      "keys": [
+        "return_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "core.returns"
+    },
+    {
+      "path": "outputs/D0/foundation/shipments.csv",
+      "sha256": "91e254bcdcd9b8a8142aba3bb43198a9dc3c38e428e32f7c8177531dcd4b8e46",
+      "row_count": 12817,
+      "columns": [
+        {
+          "name": "shipment_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "order_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "carrier",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "ship_ts",
+          "redshift_type": "timestamp"
+        },
+        {
+          "name": "delivered_ts",
+          "redshift_type": "timestamp"
+        }
+      ],
+      "keys": [
+        "shipment_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "core.shipments"
+    },
+    {
+      "path": "outputs/D0/foundation/web_events.csv",
+      "sha256": "eb19173633c852c610404b0322ee39b562bc673239515a1b29da6c0defafd334",
+      "row_count": 25000,
+      "columns": [
+        {
+          "name": "event_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "customer_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "event_ts",
+          "redshift_type": "timestamp"
+        },
+        {
+          "name": "event_type",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "page_url",
+          "redshift_type": "varchar"
+        }
+      ],
+      "keys": [
+        "event_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "core.web_events"
+    },
+    {
+      "path": "outputs/D0/foundation/campaign_touches.csv",
+      "sha256": "4fb0cf358cc10b790196b34ab54523c3137028f2a301c180fffd0b5187e76560",
+      "row_count": 8000,
+      "columns": [
+        {
+          "name": "touch_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "customer_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "payload",
+          "redshift_type": "super"
+        }
+      ],
+      "keys": [
+        "touch_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "core.campaign_touches"
+    },
+    {
+      "path": "outputs/D0/daily_revenue/daily_revenue.csv",
+      "sha256": "83ed9e9a785b3b96f0bd7e6f4c17ef4b8b8daa1233a8e4afff85d92ed7bdb60b",
+      "row_count": 1460,
+      "columns": [
+        {
+          "name": "order_date",
+          "redshift_type": "date"
+        },
+        {
+          "name": "sales_channel",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "order_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "revenue",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "order_date",
+        "sales_channel"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.daily_revenue"
+    },
+    {
+      "path": "outputs/D0/daily_revenue/report.csv",
+      "sha256": "d6d292c1aac203a6112cd5257fd407a0904cf5c616c49c883471e591a359e609",
+      "row_count": 48,
+      "columns": [
+        {
+          "name": "order_month",
+          "redshift_type": "date"
+        },
+        {
+          "name": "sales_channel",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "order_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "revenue",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "order_month",
+        "sales_channel"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/customer_ltv/customer_ltv.csv",
+      "sha256": "c7c0ec590f0f4d64c2e57367edbff56959817730d0b0cd41f3ecec533ed23de6",
+      "row_count": 1500,
+      "columns": [
+        {
+          "name": "customer_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "region",
+          "redshift_type": "bpchar"
+        },
+        {
+          "name": "clean_phone",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "order_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "ltv",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "aov",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "customer_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.customer_ltv"
+    },
+    {
+      "path": "outputs/D0/customer_ltv/report.csv",
+      "sha256": "f253a907684744a7d9137c8e0742127b9d0ab0812e5474ff14625664a40d6c66",
+      "row_count": 6,
+      "columns": [
+        {
+          "name": "region",
+          "redshift_type": "bpchar"
+        },
+        {
+          "name": "customers",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "orders",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "total_ltv",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "avg_ltv",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "region"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/geo_rollup/geo_rollup.csv",
+      "sha256": "b4249398d1d03c0e42b31e4cba6688fa558f083c62797476cc320bb778a15de4",
+      "row_count": 21,
+      "columns": [
+        {
+          "name": "grouping_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "region",
+          "redshift_type": "bpchar"
+        },
+        {
+          "name": "state",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "order_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "revenue",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "grouping_id",
+        "region",
+        "state"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.geo_rollup"
+    },
+    {
+      "path": "outputs/D0/geo_rollup/report.csv",
+      "sha256": "b4249398d1d03c0e42b31e4cba6688fa558f083c62797476cc320bb778a15de4",
+      "row_count": 21,
+      "columns": [
+        {
+          "name": "grouping_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "region",
+          "redshift_type": "bpchar"
+        },
+        {
+          "name": "state",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "order_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "revenue",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "grouping_id",
+        "region",
+        "state"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/churn_flags/churn_flags.csv",
+      "sha256": "1730610978c665893533da0a87cf09755e5daf81374bfd2e6c50b0c93c5c7e61",
+      "row_count": 1500,
+      "columns": [
+        {
+          "name": "customer_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "last_order_date",
+          "redshift_type": "date"
+        },
+        {
+          "name": "days_since_order",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "churn_flag",
+          "redshift_type": "varchar"
+        }
+      ],
+      "keys": [
+        "customer_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.churn_flags"
+    },
+    {
+      "path": "outputs/D0/churn_flags/report.csv",
+      "sha256": "a8288842c78d17137d173a27f7e3680fd7b2b31856f2c9051376c548f8cf3ede",
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "churn_flag",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "customers",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "avg_days_since_order",
+          "redshift_type": "int8"
+        }
+      ],
+      "keys": [
+        "churn_flag"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/product_perf/product_perf.csv",
+      "sha256": "34bcea53ff9f11ee5fe36e09d9cc0dc1d1cb1b2e0e6818def35c932a299c86c8",
+      "row_count": 300,
+      "columns": [
+        {
+          "name": "product_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "category",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "units_sold",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "revenue",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "top_stores",
+          "redshift_type": "varchar"
+        }
+      ],
+      "keys": [
+        "product_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.product_perf"
+    },
+    {
+      "path": "outputs/D0/product_perf/report.csv",
+      "sha256": "dfcdbb76fee93e7d7dd3b6fe48040cb32e0b197adeec0c3b750d5facfadf3064",
+      "row_count": 6,
+      "columns": [
+        {
+          "name": "category",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "products",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "units_sold",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "revenue",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "category"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/store_weekly/store_weekly.csv",
+      "sha256": "cef9813787431a1f21ae82fb96e3e2c201594b30f5f833ea7fbf1f53091f385f",
+      "row_count": 2120,
+      "columns": [
+        {
+          "name": "store_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "week_start",
+          "redshift_type": "date"
+        },
+        {
+          "name": "week_end",
+          "redshift_type": "date"
+        },
+        {
+          "name": "week_number",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "order_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "revenue",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "store_id",
+        "week_start"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.store_weekly"
+    },
+    {
+      "path": "outputs/D0/store_weekly/report.csv",
+      "sha256": "dc03eb939e21648e1e980d28585c631c05217c8c7a79b66d6dde8266330d6e8f",
+      "row_count": 40,
+      "columns": [
+        {
+          "name": "store_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "region",
+          "redshift_type": "bpchar"
+        },
+        {
+          "name": "active_weeks",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "order_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "revenue",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "store_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/category_mix/category_mix.csv",
+      "sha256": "df1bb4a75ab433190472e8477079c1f59665ae7cf9f1dc984eedfd61b9c8345e",
+      "row_count": 6,
+      "columns": [
+        {
+          "name": "category",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "units_sold",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "revenue",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "revenue_share",
+          "redshift_type": "float8"
+        }
+      ],
+      "keys": [
+        "category"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.category_mix"
+    },
+    {
+      "path": "outputs/D0/category_mix/report.csv",
+      "sha256": "df1bb4a75ab433190472e8477079c1f59665ae7cf9f1dc984eedfd61b9c8345e",
+      "row_count": 6,
+      "columns": [
+        {
+          "name": "category",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "units_sold",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "revenue",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "revenue_share",
+          "redshift_type": "float8"
+        }
+      ],
+      "keys": [
+        "category"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/basket_affinity/basket_affinity.csv",
+      "sha256": "65d0f3eb78979422a48e8ca4f281e11ca79df5a8be1afdefe7112f3869286f25",
+      "row_count": 50,
+      "columns": [
+        {
+          "name": "product_id_a",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "product_id_b",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "pair_orders",
+          "redshift_type": "int8"
+        }
+      ],
+      "keys": [
+        "product_id_a",
+        "product_id_b"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.basket_affinity"
+    },
+    {
+      "path": "outputs/D0/basket_affinity/report.csv",
+      "sha256": "06aae4711bf5eec2c8d1f5a80df93b0c6c436ae745492771b7bc15ec6bc5f7cb",
+      "row_count": 50,
+      "columns": [
+        {
+          "name": "product_id_a",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "product_id_b",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "pair",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "pair_orders",
+          "redshift_type": "int8"
+        }
+      ],
+      "keys": [
+        "product_id_a",
+        "product_id_b"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/sessionization/web_sessions.csv",
+      "sha256": "e45e501bf0cc084d04217a30b216f0d335f290e1b0058cd6b009ff6af6e5ad77",
+      "row_count": 21280,
+      "columns": [
+        {
+          "name": "customer_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "session_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "session_start_ts",
+          "redshift_type": "timestamp"
+        },
+        {
+          "name": "session_end_ts",
+          "redshift_type": "timestamp"
+        },
+        {
+          "name": "event_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "checkout_events",
+          "redshift_type": "int8"
+        }
+      ],
+      "keys": [
+        "customer_id",
+        "session_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.web_sessions"
+    },
+    {
+      "path": "outputs/D0/sessionization/report.csv",
+      "sha256": "8bb749e8e2b40ef22a68d6e9ba93a950800976077274ebfed9a6d1788844e2c9",
+      "row_count": 1500,
+      "columns": [
+        {
+          "name": "customer_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "sessions",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "events",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "checkout_sessions",
+          "redshift_type": "int8"
+        }
+      ],
+      "keys": [
+        "customer_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/shipping_sla/shipping_sla.csv",
+      "sha256": "e4412084ec8bb3709392e27274a40320ae83924b4949024efdb1ffe02643c1a6",
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "carrier",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "shipments",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "delivered",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "in_flight",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "avg_hours_to_deliver",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "max_hours_to_deliver",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "on_time_96h",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "earliest_local_delivery_hour",
+          "redshift_type": "int4"
+        }
+      ],
+      "keys": [
+        "carrier"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.shipping_sla"
+    },
+    {
+      "path": "outputs/D0/shipping_sla/report.csv",
+      "sha256": "1650ce135177fe47102ab4fc07a6e3a73332b4580e549175cd3f6e2ad48f5b9e",
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "carrier",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "shipments",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "delivered",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "in_flight",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "avg_hours_to_deliver",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "max_hours_to_deliver",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "on_time_96h",
+          "redshift_type": "int8"
+        }
+      ],
+      "keys": [
+        "carrier"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/rfm_segments/rfm_segments.csv",
+      "sha256": "1be7eddef7edfe9cfca2267e364f3e09e19d06a31a0415cb7cf6c331175f7745",
+      "row_count": 1500,
+      "columns": [
+        {
+          "name": "customer_id",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "recency_days",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "frequency",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "monetary",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "r_tile",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "f_tile",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "m_tile",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "rfm_segment",
+          "redshift_type": "varchar"
+        }
+      ],
+      "keys": [
+        "customer_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.rfm_segments"
+    },
+    {
+      "path": "outputs/D0/rfm_segments/report.csv",
+      "sha256": "67bea1e154c8ce7feae1501622c9ab75b4f30830518d068b19756d40be6b73cb",
+      "row_count": 103,
+      "columns": [
+        {
+          "name": "rfm_segment",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "customers",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "total_monetary",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "avg_frequency",
+          "redshift_type": "int8"
+        }
+      ],
+      "keys": [
+        "rfm_segment"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/promo_lift/promo_lift.csv",
+      "sha256": "803183646fcc150c67384931f80a635505c0756a51431bcf7902c5ca5edb7f0d",
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "sales_channel",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "order_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "median_order_value",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "p90_order_value",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "sales_channel"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.promo_lift"
+    },
+    {
+      "path": "outputs/D0/promo_lift/report.csv",
+      "sha256": "803183646fcc150c67384931f80a635505c0756a51431bcf7902c5ca5edb7f0d",
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "sales_channel",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "order_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "median_order_value",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "p90_order_value",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "sales_channel"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/payment_mix/payment_mix.csv",
+      "sha256": "4abfe51d83caeae78c99fb0a8f8456e57b14b52d5b014ef197b03ddc9337137c",
+      "row_count": 5,
+      "columns": [
+        {
+          "name": "method",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "method_family",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "method_status",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "payment_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "amount_total",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "amount_share",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "method"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.payment_mix"
+    },
+    {
+      "path": "outputs/D0/payment_mix/report.csv",
+      "sha256": "7b315b136630824b183f16062ddefde92fb783bd2d8c7cd60d3bc5d130813c8a",
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "method_family",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "payment_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "amount_total",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "method_family"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/returns_rate/returns_rate.csv",
+      "sha256": "c28831d93597b20328701dc2bfb0a87ac7310b30783b0dd5f6ed482e0e9ff117",
+      "row_count": 6,
+      "columns": [
+        {
+          "name": "category",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "sold_qty",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "returned_qty",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "return_rate_int",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "return_pct",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "category"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.returns_rate"
+    },
+    {
+      "path": "outputs/D0/returns_rate/report.csv",
+      "sha256": "c28831d93597b20328701dc2bfb0a87ac7310b30783b0dd5f6ed482e0e9ff117",
+      "row_count": 6,
+      "columns": [
+        {
+          "name": "category",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "sold_qty",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "returned_qty",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "return_rate_int",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "return_pct",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "category"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/attribution/attribution.csv",
+      "sha256": "9024574d17b1465244c75813ff66944a15eb2b246213606e99765dad36e50900",
+      "row_count": 100,
+      "columns": [
+        {
+          "name": "campaign_id",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "touch_channel",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "touches",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "customers_reached",
+          "redshift_type": "int8"
+        }
+      ],
+      "keys": [
+        "campaign_id",
+        "touch_channel"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.attribution"
+    },
+    {
+      "path": "outputs/D0/attribution/report.csv",
+      "sha256": "9d2772c4f40aa94d6f664994a6b8a01d967ac187511536e91ad0546049cfe62e",
+      "row_count": 20,
+      "columns": [
+        {
+          "name": "campaign_id",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "touches",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "customers_reached",
+          "redshift_type": "int8"
+        }
+      ],
+      "keys": [
+        "campaign_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/inventory_snapshot/inventory_snapshot.csv",
+      "sha256": "673f397613b53e372e96b517ac8ba0d2ba5e4f16375bee3f26021b302e4746b9",
+      "row_count": 300,
+      "columns": [
+        {
+          "name": "product_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "snapshot_date",
+          "redshift_type": "date"
+        },
+        {
+          "name": "units_sold",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "on_hand",
+          "redshift_type": "int4"
+        }
+      ],
+      "keys": [
+        "product_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.inventory_snapshot"
+    },
+    {
+      "path": "outputs/D0/inventory_snapshot/report.csv",
+      "sha256": "6c0834747d95ed33660a81e08e6b25592bcb151ad8ecac8de945a9aff78375ba",
+      "row_count": 50,
+      "columns": [
+        {
+          "name": "product_id",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "snapshot_date",
+          "redshift_type": "date"
+        },
+        {
+          "name": "units_sold",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "on_hand",
+          "redshift_type": "int4"
+        }
+      ],
+      "keys": [
+        "product_id"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/finance_export/finance_monthly.csv",
+      "sha256": "0789b037bf310ad5f74fd14c193864fad776ba017b900044d860f34b951cfa44",
+      "row_count": 12,
+      "columns": [
+        {
+          "name": "month",
+          "redshift_type": "date"
+        },
+        {
+          "name": "fiscal_year",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "fiscal_qtr",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "order_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "revenue",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "month"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.finance_monthly"
+    },
+    {
+      "path": "outputs/D0/finance_export/report.csv",
+      "sha256": "8453893688aa18c46443d33b42fe5a569bbb6b306cc16158d3fc85cec3e76cd3",
+      "row_count": 5,
+      "columns": [
+        {
+          "name": "fiscal_year",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "fiscal_qtr",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "order_count",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "revenue",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "fiscal_year",
+        "fiscal_qtr"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/cohort_retention/cohort_retention.csv",
+      "sha256": "be4f93668aac43d9c4bc6168a7c647d43187ae0e84777d98b400c03274b95660",
+      "row_count": 65,
+      "columns": [
+        {
+          "name": "cohort_month",
+          "redshift_type": "date"
+        },
+        {
+          "name": "month_offset",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "cohort_size",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "active_buyers",
+          "redshift_type": "int8"
+        }
+      ],
+      "keys": [
+        "cohort_month",
+        "month_offset"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.cohort_retention"
+    },
+    {
+      "path": "outputs/D0/cohort_retention/report.csv",
+      "sha256": "a27fc11a64265ec83e95bad494d44012a639369108af79ec362080442dc74f6b",
+      "row_count": 65,
+      "columns": [
+        {
+          "name": "cohort_month",
+          "redshift_type": "date"
+        },
+        {
+          "name": "month_offset",
+          "redshift_type": "int4"
+        },
+        {
+          "name": "cohort_size",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "active_buyers",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "retention_pct",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "cohort_month",
+        "month_offset"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    },
+    {
+      "path": "outputs/D0/orchestration/exec_summary.csv",
+      "sha256": "ec4ce1a9b6b5ee9efc264994a4a7fcd8cc550dc712373b191756f12d76c76246",
+      "row_count": 1,
+      "columns": [
+        {
+          "name": "snapshot_label",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "as_of_date",
+          "redshift_type": "date"
+        },
+        {
+          "name": "total_revenue",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "total_orders",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "avg_customer_ltv",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "overall_return_pct",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "avg_ship_hours",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "snapshot_label"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true,
+      "source_table": "mart.exec_summary"
+    },
+    {
+      "path": "outputs/D0/orchestration/report.csv",
+      "sha256": "ec4ce1a9b6b5ee9efc264994a4a7fcd8cc550dc712373b191756f12d76c76246",
+      "row_count": 1,
+      "columns": [
+        {
+          "name": "snapshot_label",
+          "redshift_type": "varchar"
+        },
+        {
+          "name": "as_of_date",
+          "redshift_type": "date"
+        },
+        {
+          "name": "total_revenue",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "total_orders",
+          "redshift_type": "int8"
+        },
+        {
+          "name": "avg_customer_ltv",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "overall_return_pct",
+          "redshift_type": "numeric"
+        },
+        {
+          "name": "avg_ship_hours",
+          "redshift_type": "numeric"
+        }
+      ],
+      "keys": [
+        "snapshot_label"
+      ],
+      "reused_from_legacy_run": true,
+      "matches_committed_golden": true
+    }
+  ],
+  "tables": [
+    {
+      "table": "silver.customers",
+      "path": "outputs/D0/foundation/customers.csv",
+      "columns": [
+        "customer_id",
+        "email",
+        "first_name",
+        "last_name",
+        "phone",
+        "region",
+        "preferred_store_id",
+        "signup_date",
+        "is_business"
+      ]
+    },
+    {
+      "table": "silver.stores",
+      "path": "outputs/D0/foundation/stores.csv",
+      "columns": [
+        "store_id",
+        "region",
+        "store_name",
+        "city",
+        "state"
+      ]
+    },
+    {
+      "table": "silver.products",
+      "path": "outputs/D0/foundation/products.csv",
+      "columns": [
+        "product_id",
+        "sku",
+        "product_name",
+        "category",
+        "subcategory",
+        "unit_price",
+        "cost",
+        "active"
+      ]
+    },
+    {
+      "table": "silver.orders",
+      "path": "outputs/D0/foundation/orders.csv",
+      "columns": [
+        "order_id",
+        "customer_id",
+        "store_id",
+        "order_ts",
+        "sales_channel",
+        "status"
+      ]
+    },
+    {
+      "table": "silver.order_items",
+      "path": "outputs/D0/foundation/order_items.csv",
+      "columns": [
+        "order_item_id",
+        "order_id",
+        "product_id",
+        "quantity",
+        "unit_price",
+        "discount"
+      ]
+    },
+    {
+      "table": "silver.payments",
+      "path": "outputs/D0/foundation/payments.csv",
+      "columns": [
+        "payment_id",
+        "order_id",
+        "method",
+        "amount",
+        "paid_ts"
+      ]
+    },
+    {
+      "table": "silver.returns",
+      "path": "outputs/D0/foundation/returns.csv",
+      "columns": [
+        "return_id",
+        "order_item_id",
+        "quantity",
+        "reason",
+        "returned_ts"
+      ]
+    },
+    {
+      "table": "silver.shipments",
+      "path": "outputs/D0/foundation/shipments.csv",
+      "columns": [
+        "shipment_id",
+        "order_id",
+        "carrier",
+        "ship_ts",
+        "delivered_ts"
+      ]
+    },
+    {
+      "table": "silver.web_events",
+      "path": "outputs/D0/foundation/web_events.csv",
+      "columns": [
+        "event_id",
+        "customer_id",
+        "event_ts",
+        "event_type",
+        "page_url"
+      ]
+    },
+    {
+      "table": "silver.campaign_touches",
+      "path": "outputs/D0/foundation/campaign_touches.csv",
+      "columns": [
+        "touch_id",
+        "customer_id",
+        "payload"
+      ]
+    },
+    {
+      "table": "gold.daily_revenue",
+      "path": "outputs/D0/daily_revenue/daily_revenue.csv",
+      "columns": [
+        "order_date",
+        "sales_channel",
+        "order_count",
+        "revenue"
+      ]
+    },
+    {
+      "table": "gold.customer_ltv",
+      "path": "outputs/D0/customer_ltv/customer_ltv.csv",
+      "columns": [
+        "customer_id",
+        "region",
+        "clean_phone",
+        "order_count",
+        "ltv",
+        "aov"
+      ]
+    },
+    {
+      "table": "gold.geo_rollup",
+      "path": "outputs/D0/geo_rollup/geo_rollup.csv",
+      "columns": [
+        "grouping_id",
+        "region",
+        "state",
+        "order_count",
+        "revenue"
+      ]
+    },
+    {
+      "table": "gold.churn_flags",
+      "path": "outputs/D0/churn_flags/churn_flags.csv",
+      "columns": [
+        "customer_id",
+        "last_order_date",
+        "days_since_order",
+        "churn_flag"
+      ]
+    },
+    {
+      "table": "gold.product_perf",
+      "path": "outputs/D0/product_perf/product_perf.csv",
+      "columns": [
+        "product_id",
+        "category",
+        "units_sold",
+        "revenue",
+        "top_stores"
+      ]
+    },
+    {
+      "table": "gold.store_weekly",
+      "path": "outputs/D0/store_weekly/store_weekly.csv",
+      "columns": [
+        "store_id",
+        "week_start",
+        "week_end",
+        "week_number",
+        "order_count",
+        "revenue"
+      ]
+    },
+    {
+      "table": "gold.category_mix",
+      "path": "outputs/D0/category_mix/category_mix.csv",
+      "columns": [
+        "category",
+        "units_sold",
+        "revenue",
+        "revenue_share"
+      ]
+    },
+    {
+      "table": "gold.basket_affinity",
+      "path": "outputs/D0/basket_affinity/basket_affinity.csv",
+      "columns": [
+        "product_id_a",
+        "product_id_b",
+        "pair_orders"
+      ]
+    },
+    {
+      "table": "gold.web_sessions",
+      "path": "outputs/D0/sessionization/web_sessions.csv",
+      "columns": [
+        "customer_id",
+        "session_id",
+        "session_start_ts",
+        "session_end_ts",
+        "event_count",
+        "checkout_events"
+      ]
+    },
+    {
+      "table": "gold.shipping_sla",
+      "path": "outputs/D0/shipping_sla/shipping_sla.csv",
+      "columns": [
+        "carrier",
+        "shipments",
+        "delivered",
+        "in_flight",
+        "avg_hours_to_deliver",
+        "max_hours_to_deliver",
+        "on_time_96h",
+        "earliest_local_delivery_hour"
+      ]
+    },
+    {
+      "table": "gold.rfm_segments",
+      "path": "outputs/D0/rfm_segments/rfm_segments.csv",
+      "columns": [
+        "customer_id",
+        "recency_days",
+        "frequency",
+        "monetary",
+        "r_tile",
+        "f_tile",
+        "m_tile",
+        "rfm_segment"
+      ]
+    },
+    {
+      "table": "gold.promo_lift",
+      "path": "outputs/D0/promo_lift/promo_lift.csv",
+      "columns": [
+        "sales_channel",
+        "order_count",
+        "median_order_value",
+        "p90_order_value"
+      ]
+    },
+    {
+      "table": "gold.payment_mix",
+      "path": "outputs/D0/payment_mix/payment_mix.csv",
+      "columns": [
+        "method",
+        "method_family",
+        "method_status",
+        "payment_count",
+        "amount_total",
+        "amount_share"
+      ]
+    },
+    {
+      "table": "gold.returns_rate",
+      "path": "outputs/D0/returns_rate/returns_rate.csv",
+      "columns": [
+        "category",
+        "sold_qty",
+        "returned_qty",
+        "return_rate_int",
+        "return_pct"
+      ]
+    },
+    {
+      "table": "gold.attribution",
+      "path": "outputs/D0/attribution/attribution.csv",
+      "columns": [
+        "campaign_id",
+        "touch_channel",
+        "touches",
+        "customers_reached"
+      ]
+    },
+    {
+      "table": "gold.inventory_snapshot",
+      "path": "outputs/D0/inventory_snapshot/inventory_snapshot.csv",
+      "columns": [
+        "product_id",
+        "snapshot_date",
+        "units_sold",
+        "on_hand"
+      ]
+    },
+    {
+      "table": "gold.finance_monthly",
+      "path": "outputs/D0/finance_export/finance_monthly.csv",
+      "columns": [
+        "month",
+        "fiscal_year",
+        "fiscal_qtr",
+        "order_count",
+        "revenue"
+      ]
+    },
+    {
+      "table": "gold.cohort_retention",
+      "path": "outputs/D0/cohort_retention/cohort_retention.csv",
+      "columns": [
+        "cohort_month",
+        "month_offset",
+        "cohort_size",
+        "active_buyers"
+      ]
+    },
+    {
+      "table": "gold.exec_summary",
+      "path": "outputs/D0/orchestration/exec_summary.csv",
+      "columns": [
+        "snapshot_label",
+        "as_of_date",
+        "total_revenue",
+        "total_orders",
+        "avg_customer_ltv",
+        "overall_return_pct",
+        "avg_ship_hours"
+      ]
+    }
+  ]
+}
