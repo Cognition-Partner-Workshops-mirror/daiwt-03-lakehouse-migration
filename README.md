@@ -178,6 +178,10 @@ gate cycle. The registry describes data dependencies, not historical wave gates.
 Production deployment retains Devin-CI OIDC authentication, runs modernization
 for every manifest drop, and retains the existing aggregate parity artifacts
 and attestation checks.
+The final deployment gate, `python ci/check_grants.py --target prod`, reads
+deployed job ACLs and effective catalog/schema grants, including inherited
+privileges and ownership. It prints its results to the workflow summary and
+fails if required access is missing. It never changes grants.
 
 ## Local checks
 

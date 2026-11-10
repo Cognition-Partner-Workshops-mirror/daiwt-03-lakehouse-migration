@@ -61,3 +61,6 @@ jobs:
           if [ -f attestation.md ]; then cat attestation.md >> "$GITHUB_STEP_SUMMARY"; fi
           test '${{ steps.parity.outcome }}' = success
           test '${{ steps.attest.outcome }}' = success
+      - name: Check deployed grants
+        if: always()
+        run: python ci/check_grants.py --target prod
