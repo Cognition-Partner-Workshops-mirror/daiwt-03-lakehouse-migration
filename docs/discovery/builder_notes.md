@@ -12,6 +12,35 @@ Derived from [business rules](business_rules.md); source pointers below were che
 - `00_foundation/03_udfs.sql:12-17`: phone regex strips non-digits, retaining country-code digits; NULL stays NULL. Apply in customer_ltv, not silver.
 - Shared arithmetic: integer division and integer AVG truncate toward zero; numeric AVG truncates at input scale. For non-negative decimal aggregates, explicit truncation/floor at the required scale is appropriate. Keep decimal interpolation and division in DECIMAL, not DOUBLE; preserve each intermediate scale before multiplying. Float-to-decimal conversion is not a substitute for decimal truncation; category_mix alone publishes a float ratio (see below).
 
+### Shared expression references
+
+Use the canonical templates in [shared macros §4](shared_macros.md#4-shared-inline-macros-redshift-idioms); M numbers below identify rows there. The proposed `src/sql/shared/macros.sql` is a reference catalogue, not an executable resource. Foundation owns suffix-scoped SQL UDFs as described in [§3](shared_macros.md#3-legacy-udfs--shared-sql-functions); parameterize qualified names and preserve foundation dependencies for callers. Shared-library changes select all registered units.
+
+| Builder | Shared templates |
+|---|---|
+| Foundation / silver | M1 CHAR padding; M13 date extraction; M15 fiscal quarter; §3 phone UDF; keep SUPER JSON verbatim before M21 consumers. |
+| daily_revenue | M13, M18 date/month and decimal line revenue. |
+| customer_ltv | M1, M4, M18 and §3.2 phone cleaning. |
+| geo_rollup | M1, M18 padded grouping and exact revenue. |
+| churn_flags | M3, M12, M19 integer AVG, date subtraction, anchor. |
+| product_perf | M1, M2, M18, M20 ordered trimmed LISTAGG and ranking. |
+| store_weekly | M1, M10, M13, M18 week boundaries and padded report region. |
+| category_mix | M7, M18 decimal quotient converted to DOUBLE. |
+| basket_affinity | Plain self-join/HAVING and deterministic report LIMIT; no additional macro. |
+| sessionization | M9, M20 second boundaries and explicit window ordering. |
+| shipping_sla | M3, M9, M16 integer AVG, hour boundaries and timezone conversion. |
+| rfm_segments | M3, M12, M18–M20 integer AVG, recency, revenue, anchor and NULL ordering. |
+| promo_lift | M8, M18 decimal interpolation and line revenue. |
+| payment_mix | M6, M17 scaled division and NULL-aware conditional functions. |
+| returns_rate | M5, M6 integer and scale-15 decimal division. |
+| attribution | M21 inner SUPER unnest. |
+| inventory_snapshot | M19 literal snapshot anchor; procedure staging semantics remain unit-specific. |
+| finance_export | M5, M13–M15, M18 integer fiscal expression and monthly revenue. |
+| cohort_retention | M11, M13, M22 month boundaries and decimal HALF_UP rounding. |
+| orchestration | M4, M6, M19 scaled aggregates and fixed anchor. |
+
+M3 uses `NULLIF(COUNT(x), 0)` to preserve all-null AVG as NULL. M6 floor templates apply to non-negative values; integer truncation remains toward zero. M17 DECODE matches NULL to NULL; a CASE rewrite must retain that behavior. Analyst M7 uses a decimal quotient followed by DOUBLE conversion for exact D0 rendering; a direct DOUBLE quotient is within documented float tolerance but can differ in the last ULP. Analyst engine checks are retained evidence, not newly executed here.
+
 ### Silver — ten entity builders
 
 | Entity | Source pointer | Semantics to mirror |
@@ -57,7 +86,7 @@ Derived from [business rules](business_rules.md); source pointers below were che
 - `units/store_weekly/report.sql:3-9`: padded store region and boundary week span plus one, retaining the stores join.
 
 ### category_mix
-- `units/category_mix/etl.sql:7-14`: RATIO_TO_REPORT returns float8; cast operands to DOUBLE and divide by window total, returning NULL for zero total. Keep revenue itself decimal. Do not quantize the share to a decimal scale.
+- `units/category_mix/etl.sql:7-14`: RATIO_TO_REPORT returns float8; use shared M7's decimal quotient followed by DOUBLE conversion, returning NULL for zero total. Keep revenue itself decimal; publish the share as DOUBLE.
 
 ### basket_affinity
 - `units/basket_affinity/etl.sql:7-11`: self-join same order with product b > product a, distinct order count, HAVING count >=5.

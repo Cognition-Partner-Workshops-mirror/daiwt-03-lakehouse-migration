@@ -9,6 +9,6 @@ Source paths in these documents refer to `daiwt-03-redshift` unless explicitly m
 - [Business rules](business_rules.md): analyst semantic catalogue and golden column impact.
 - [Builder notes](builder_notes.md): wave-by-wave implementation checklist with source line pointers.
 - [Orchestration mapping](orchestration_mapping.md): schedule, task graph, exports, and governance.
-- [Shared macros](shared_macros.md): placeholder; analyst document pending, not included in this commit.
+- [Shared macros](shared_macros.md): foundation DDL, SQL UDF placement, and canonical Redshift expression templates (M1–M22).
 
 Analyst evidence labels and recomputation results are retained as supplied; this documentation preparation checks local source pointers and manifest/contract alignment, not live engine behavior. No source rebuild, golden capture, deployment, or data mutation is part of this handover.
