@@ -21,7 +21,8 @@ if action == 'apply':
             except Exception as error:
                 condition = error.getCondition() if hasattr(error, 'getCondition') else ''
                 if (plan['pipeline'] and field != 'tags'
-                        and condition and ('NOT_SUPPORTED' in condition or 'UNSUPPORTED' in condition)):
+                        and condition and ('NOT_SUPPORTED' in condition or 'UNSUPPORTED' in condition
+                                       or 'NOT_ALLOWED_FOR_PIPELINE' in condition)):
                     notes.setdefault(plan['table'], []).append(field)
                     print(f"NOTE {plan['table']} {field}: {error}")
                 else:
