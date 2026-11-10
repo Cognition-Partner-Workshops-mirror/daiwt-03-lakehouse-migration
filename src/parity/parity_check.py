@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 
 GOLDEN_PATH = "/Volumes/daiwt_03_mig_prod/landing/golden"
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(globals().get("__file__", sys.argv[0])).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'ci'))
 from registry import load, validate
 IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
@@ -198,7 +198,10 @@ class GoldenStore:
         return rows
 
 
-def run(client, catalog, suffix, warehouse_id, registry, drop="D0", *, contract=None, ran_units=None):
+def run(client, catalog, suffix, warehouse_id, registry, drop="D0", *, contract=None, ran_units=None,
+        layer=None):
+    if layer not in (None, "silver", "gold"):
+        raise ValueError("Unsupported parity layer")
     if catalog not in ("daiwt_03_mig_dev", "daiwt_03_mig_prod"):
         raise ValueError("Unsupported catalog")
     identifier(suffix)
@@ -216,6 +219,8 @@ def run(client, catalog, suffix, warehouse_id, registry, drop="D0", *, contract=
     contract = contract if contract is not None else json.loads((ROOT / "src/parity/contract.json").read_text())
     validate(registry, contract)
     entries = contract_entries(contract, store.manifest(), drop)
+    if layer is not None:
+        entries = [entry for entry in entries if entry["table"].startswith(layer + ".")]
     result = compare({"tables": entries}, registry, store.rows, actual,
                      ran_units if catalog.endswith("_dev") else None)
     for row in result["results"]:
@@ -233,6 +238,7 @@ def main():
     parser.add_argument("--units", "--ran-units", dest="ran_units", type=Path)
     parser.add_argument("--warehouse-id", default="6dc4b80538621b7b")
     parser.add_argument("--profile")
+    parser.add_argument("--layer", choices=("silver", "gold"))
     parser.add_argument("--output", default="out/parity.json")
     args = parser.parse_args()
     output = Path(args.output)
@@ -247,7 +253,7 @@ def main():
                                       or not all(isinstance(unit, str) for unit in ran_units)):
             raise ValueError("ran units must be a list of unit names")
         result = run(client, args.catalog, args.suffix, args.warehouse_id, registry, args.drop,
-                     ran_units=ran_units)
+                     ran_units=ran_units, layer=args.layer)
     except Exception as exc:
         result = {"status": "FAIL", "drop": args.drop, "goldens": 0, "results": [],
                   "counts": {"PASS": 0, "FAIL": 0, "SKIP": 0}, "compared": 0, "error": str(exc)}
@@ -260,4 +266,6 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    exit_code = main()
+    if exit_code:
+        raise SystemExit(exit_code)
