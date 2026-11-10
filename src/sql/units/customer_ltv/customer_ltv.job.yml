@@ -1,0 +1,50 @@
+resources:
+  jobs:
+    customer_ltv:
+      name: ${var.job_name_prefix}customer_ltv
+      parameters:
+        - name: drop
+          default: D0
+      tags:
+        environment: ${bundle.target}
+      tasks:
+        - task_key: customer_ltv
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ./etl.sql
+              source: WORKSPACE
+            parameters:
+              catalog: ${var.catalog}
+              bronze_schema: ${var.bronze_schema}
+              silver_schema: ${var.silver_schema}
+              gold_schema: ${var.gold_schema}
+              drop: "{{job.parameters.drop}}"
+        - task_key: report_customer_ltv
+          depends_on:
+            - task_key: customer_ltv
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ./report.sql
+              source: WORKSPACE
+            parameters:
+              catalog: ${var.catalog}
+              bronze_schema: ${var.bronze_schema}
+              silver_schema: ${var.silver_schema}
+              gold_schema: ${var.gold_schema}
+              drop: "{{job.parameters.drop}}"
+        - task_key: self_check
+          depends_on:
+            - task_key: report_customer_ltv
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ./self_check.sql
+              source: WORKSPACE
+            parameters:
+              catalog: ${var.catalog}
+              bronze_schema: ${var.bronze_schema}
+              silver_schema: ${var.silver_schema}
+              gold_schema: ${var.gold_schema}
+              drop: "{{job.parameters.drop}}"
