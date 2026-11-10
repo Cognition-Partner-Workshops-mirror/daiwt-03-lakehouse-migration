@@ -1,0 +1,28 @@
+{
+  "skipped_branches": [
+    {
+      "unit": "finance_export",
+      "path": "legacy/redshift/units/finance_export/export.sql",
+      "reason": "capture_skip; UNLOAD destination and IAM role are placeholders; not run by cmdBuild"
+    },
+    {
+      "unit": "orchestration",
+      "path": "legacy/redshift/99_orchestration/refresh_schedule.yaml",
+      "reason": "capture_skip; scheduler specification, not installed; load_core uses unsupported --ddl-only; finance_export step not run by cmdBuild"
+    }
+  ],
+  "scheduler_drift": [
+    {
+      "path": "legacy/redshift/99_orchestration/refresh_schedule.yaml",
+      "step": "load_core",
+      "declared_command": "tools/legacy_redshift.py setup --ddl-only",
+      "finding": "--ddl-only is not accepted by the legacy runner; scheduler YAML is not an installed scheduler and is not executed by cmdBuild."
+    },
+    {
+      "path": "legacy/redshift/99_orchestration/refresh_schedule.yaml",
+      "step": "finance_export",
+      "declared_command": "units/finance_export/export.sql",
+      "finding": "cmdBuild executes only etl.sql paths and excludes capture_skip; the placeholder UNLOAD is never executed."
+    }
+  ]
+}

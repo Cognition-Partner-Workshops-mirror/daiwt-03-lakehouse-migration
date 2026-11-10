@@ -6,3 +6,5 @@ out/
 attestation.md
 *.pyc
 .env
+golden/inputs/
+golden/outputs/
