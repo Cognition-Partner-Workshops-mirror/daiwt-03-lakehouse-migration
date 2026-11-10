@@ -1,9 +1,17 @@
 bundle:
   name: daiwt-03-migration
+  databricks_cli_version: '>= 1.25.0'
+
+python:
+  resources:
+    - 'silver_resources:load_resources'
 
 include: [src/sql/units/*/*.yml]
 
 variables:
+  silver_bad_rows:
+    description: Dev-only synthetic quarantine rows; never enable in production.
+    default: "false"
   catalog:
     description: Target Unity Catalog catalog.
   schema_suffix:
@@ -56,6 +64,7 @@ targets:
       root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/prod
     variables:
       catalog: daiwt_03_mig_prod
+      silver_bad_rows: "false"
       schema_suffix: prod
       job_name_prefix: ""
       bronze_schema: bronze

@@ -82,6 +82,10 @@ Registered outputs report PASS only for exact row-count and content matches.
 
 ## Adding a unit
 
+Silver entity builders: follow [the Lakeflow scaffold template](src/sql/units/silver_pipeline/README.md).
+Bundle commands require CLI 1.25.0 and `requirements-dev.txt` installed in the
+active Python environment (including `databricks-bundles` for pipeline discovery).
+
 1. Add SQL and its bundle job resource under `src/sql/units/<unit>/`, included from
    `databricks.yml`. Pass catalog and layer schema variables to the job, and name it
    `${var.job_name_prefix}<unit>` (dev `[pr_<n>] <unit>`, prod `<unit>`).
