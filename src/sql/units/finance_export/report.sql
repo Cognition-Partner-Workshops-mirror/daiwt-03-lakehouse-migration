@@ -1,0 +1,9 @@
+CREATE OR REPLACE TABLE IDENTIFIER(:catalog || '.' || :gold_schema || '.report_finance_export')
+USING DELTA
+AS
+SELECT fiscal_year,
+       fiscal_qtr,
+       CAST(SUM(order_count) AS BIGINT)     AS order_count,
+       CAST(SUM(revenue) AS DECIMAL(38,2))  AS revenue
+FROM   IDENTIFIER(:catalog || '.' || :gold_schema || '.finance_monthly')
+GROUP  BY fiscal_year, fiscal_qtr;
