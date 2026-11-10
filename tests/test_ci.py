@@ -63,7 +63,7 @@ def test_prod_runs_registered_units_before_parity(monkeypatch):
     workflow = yaml.safe_load((ROOT / ".github/workflows/deploy-prod.yml").read_text())
     commands = "\n".join(step.get("run", "") for step in workflow["jobs"]["deploy"]["steps"])
     positions = [commands.index("databricks bundle deploy -t prod"),
-                 commands.index('python ci/run_units.py prod --target prod --drop "$drop"'),
+                 commands.index('databricks bundle run -t prod --params "drop=$drop" modernization'),
                  commands.index('python src/parity/parity_check.py --catalog daiwt_03_mig_prod --suffix prod --drop "$drop"')]
     assert positions == sorted(positions)
 

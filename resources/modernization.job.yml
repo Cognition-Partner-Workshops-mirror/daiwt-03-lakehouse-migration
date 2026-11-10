@@ -1,0 +1,73 @@
+resources:
+  jobs:
+    modernization:
+      name: ${var.job_name_prefix}modernization
+      max_concurrent_runs: 1
+      parameters:
+      - name: drop
+        default: D0
+      tags:
+        environment: ${bundle.target}
+      schedule:
+        quartz_cron_expression: 0 0 2 * * ?
+        timezone_id: UTC
+        pause_status: PAUSED
+      tasks:
+      - task_key: bronze_landing
+        run_job_task:
+          job_id: ${resources.jobs.bronze_landing.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: silver_asof
+        depends_on:
+        - task_key: bronze_landing
+        run_job_task:
+          job_id: ${resources.jobs.silver_asof.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: sql_macros
+        run_job_task:
+          job_id: ${resources.jobs.sql_macros.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+      - task_key: verify_silver
+        depends_on:
+        - task_key: bronze_landing
+        - task_key: silver_asof
+        - task_key: sql_macros
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: silver
+            unit: ''
+      - task_key: governance
+        run_if: NONE_FAILED
+        depends_on:
+        - task_key: bronze_landing
+        - task_key: silver_asof
+        - task_key: sql_macros
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.governance.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
+targets:
+  dev:
+    resources:
+      jobs:
+        modernization:
+          schedule:
+            pause_status: PAUSED
+  prod:
+    resources:
+      jobs:
+        modernization:
+          schedule:
+            pause_status: UNPAUSED
