@@ -72,7 +72,8 @@ def generate(registry, resources):
             task['run_job_task'] = dict(job_id='${resources.jobs.' + key + '.id}',
                                        job_parameters={'drop': '{{job.parameters.drop}}'})
         else:
-            task['pipeline_task'] = dict(pipeline_id='${resources.pipelines.' + key + '.id}')
+            task['pipeline_task'] = dict(pipeline_id='${resources.pipelines.' + key + '.id}',
+                                         full_refresh=True, parameters={'drop': '{{job.parameters.drop}}'})
         tasks.append(task)
     tasks.append(gate('verify_silver', 'silver', '', runnable - gold))
     for unit in order:

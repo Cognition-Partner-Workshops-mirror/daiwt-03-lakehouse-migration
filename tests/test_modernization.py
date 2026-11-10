@@ -3,8 +3,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-from modernization_dag import DESTINATION, generate, render
+from modernization_dag import DESTINATION, bundle_resources, generate, render
 from modernization import gates
+from registry import load
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -30,7 +31,8 @@ def test_generic_jobs_pipeline_and_gates():
     job = document['resources']['jobs']['modernization']
     tasks = {task['task_key']: task for task in job['tasks']}
     assert 'helper' not in tasks
-    assert tasks['typed']['pipeline_task'] == {'pipeline_id': '${resources.pipelines.typed_pipeline.id}'}
+    assert tasks['typed']['pipeline_task'] == {'pipeline_id': '${resources.pipelines.typed_pipeline.id}',
+                                               'full_refresh': True, 'parameters': {'drop': '{{job.parameters.drop}}'}}
     assert tasks['typed']['depends_on'] == [{'task_key': 'raw'}]
     assert tasks['mart']['run_job_task'] == {'job_id': '${resources.jobs.mart_job.id}',
                                            'job_parameters': {'drop': '{{job.parameters.drop}}'}}
@@ -61,6 +63,30 @@ def test_empty_registry_and_invalid_graphs():
     resources['jobs']['mixed'] = {}
     with pytest.raises(ValueError, match='mixed silver/gold'):
         generate(registry, resources)
+
+
+def test_silver_wrapper_and_future_entity_checks_precede_gate():
+    registry = load(ROOT)
+    resources = bundle_resources(ROOT)
+    registry['silver_example'] = spec('silver_example', outputs=['silver.example'],
+                                      deps=['silver_pipeline', 'silver_asof'])
+    registry['mart_example'] = spec('mart_example', outputs=['gold.example'], deps=['silver_example'])
+    resources['jobs'].update(silver_example={}, mart_example={})
+    tasks = {task['task_key']: task for task in generate(registry, resources)['resources']['jobs']['modernization']['tasks']}
+    assert tasks['silver_pipeline']['run_job_task'] == {
+        'job_id': '${resources.jobs.silver_pipeline.id}', 'job_parameters': {'drop': '{{job.parameters.drop}}'}}
+    assert tasks['silver_pipeline']['depends_on'] == [{'task_key': 'silver_asof'}]
+    assert tasks['silver_asof']['depends_on'] == [{'task_key': 'bronze_landing'}]
+    assert tasks['silver_example']['depends_on'] == [{'task_key': 'silver_asof'}, {'task_key': 'silver_pipeline'}]
+    assert {'task_key': 'silver_example'} in tasks['verify_silver']['depends_on']
+    assert {'task_key': 'silver_pipeline'} in tasks['verify_silver']['depends_on']
+    assert tasks['mart_example']['depends_on'] == [{'task_key': 'silver_example'}, {'task_key': 'verify_silver'}]
+    wrapper = resources['jobs']['silver_pipeline']
+    refresh = wrapper['tasks'][0]['pipeline_task']
+    assert refresh == {'pipeline_id': '${resources.pipelines.silver.id}', 'full_refresh': True,
+                       'parameters': {'drop': '{{job.parameters.drop}}'}}
+    assert wrapper['parameters'] == [{'name': 'drop', 'default': 'D0'}]
+    assert registry['silver_pipeline']['outputs'] == registry['silver_pipeline']['owns'] == []
 
 
 class Warehouse:

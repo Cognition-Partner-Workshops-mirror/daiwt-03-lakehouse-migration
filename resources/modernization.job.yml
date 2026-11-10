@@ -25,6 +25,13 @@ resources:
           job_id: ${resources.jobs.silver_asof.id}
           job_parameters:
             drop: '{{job.parameters.drop}}'
+      - task_key: silver_pipeline
+        depends_on:
+        - task_key: silver_asof
+        run_job_task:
+          job_id: ${resources.jobs.silver_pipeline.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
       - task_key: sql_macros
         run_job_task:
           job_id: ${resources.jobs.sql_macros.id}
@@ -34,6 +41,7 @@ resources:
         depends_on:
         - task_key: bronze_landing
         - task_key: silver_asof
+        - task_key: silver_pipeline
         - task_key: sql_macros
         notebook_task:
           notebook_path: ../src/modernization/gate_task.py
@@ -52,6 +60,7 @@ resources:
         depends_on:
         - task_key: bronze_landing
         - task_key: silver_asof
+        - task_key: silver_pipeline
         - task_key: sql_macros
         - task_key: verify_silver
         run_job_task:

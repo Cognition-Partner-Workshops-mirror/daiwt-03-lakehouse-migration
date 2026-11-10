@@ -161,10 +161,18 @@ The job inherits bundle permissions (`users` CAN_VIEW).
 Run `python ci/modernization_dag.py` after changing the registry or unit job
 resources, and commit `resources/modernization.job.yml`. Offline tests reject
 drift. Job keys come from `unit.json`; matching job resources are called with
-`drop`, or matching pipeline resources are triggered directly. A pipeline that
-needs a per-run drop should expose a parameterized wrapper job in the registry.
+`drop`, or matching pipeline resources are fully refreshed with the same runtime
+`drop` parameter (which their pipeline must declare and bind with `:drop`).
 Units without either resource are omitted, with their upstream dependencies
 retained. `sql_macros` currently has a job and is included.
+
+The registered `silver_pipeline` wrapper follows `bronze_landing` and
+`silver_asof`. It fully refreshes the shared `silver` pipeline with the run's
+`drop`, then checks Silver parity. Pipeline SQL must use `:drop`, not the static
+`${drop}` configuration substitution. Each future `silver_<entity>` registers
+its own outputs/quarantine tables and a self-check job depending on this wrapper;
+its discovered `*.pipeline.sql` runs inside the shared pipeline, not a separate
+pipeline. `verify_silver` waits for the wrapper and all entity self-checks.
 
 All non-gold units finish before `verify_silver`. That visible serverless task
 strictly compares registered silver contract outputs for the selected drop;
