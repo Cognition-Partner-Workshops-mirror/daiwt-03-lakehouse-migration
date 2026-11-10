@@ -2,7 +2,8 @@
 
 SQL-unit migration scaffold for the DAIWT-03 Databricks medallion target:
 `bronze`, `silver` and `gold` in `daiwt_03_mig_dev` and `daiwt_03_mig_prod`.
-There are 0 migrated units yet; each future unit has its own `unit.json`.
+Registered units include `sql_macros`, `bronze_landing`, `silver_asof` and
+`governance`; each unit has its own `unit.json`.
 
 Golden inputs and outputs captured from the Amazon Redshift source estate
 (`core` inputs, `mart` outputs) live in the golden volume.
@@ -12,7 +13,7 @@ Golden inputs and outputs captured from the Amazon Redshift source estate
 | Path | Purpose |
 | --- | --- |
 | `databricks.yml` | Dev and production bundle targets |
-| `src/sql/units/<unit>/` | Unit SQL, bundle YAML and `unit.json`; currently zero units |
+| `src/sql/units/<unit>/` | Unit SQL/Python, bundle YAML and `unit.json` |
 | `src/parity/parity_check.py` | Golden CSV multiset comparison using SDK Files and SQL Statements APIs |
 | `ci/dev_verify.sh` | Builder deployment, selected units, D0 parity and attestation |
 | `ci/attest.py` | Fail-closed Markdown attestation from parity JSON |
