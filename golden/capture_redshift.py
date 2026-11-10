@@ -220,11 +220,13 @@ def skipped_branches(units):
 
 
 def build_manifest(source, files, units, captured_at):
+    files = [dict(entry) for entry in files]
     entries = {entry["path"]: entry for entry in files}
     tables = []
     for unit, output in ordered_outputs(units):
         if "table" in output:
             path = f"outputs/D0/{unit}/{output['name']}.csv"
+            entries[path]["table"] = output["table"]
             tables.append({"table": output["table"], "path": path,
                            "columns": [col["name"] for col in entries[path]["columns"]]})
     return {"source": source, "capture_mode": "legacy_run", "captured_at_utc": captured_at,

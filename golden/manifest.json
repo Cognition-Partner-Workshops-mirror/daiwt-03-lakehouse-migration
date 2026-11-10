@@ -630,7 +630,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "core.customers"
+      "source_table": "core.customers",
+      "table": "silver.customers"
     },
     {
       "path": "outputs/D0/foundation/stores.csv",
@@ -663,7 +664,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "core.stores"
+      "source_table": "core.stores",
+      "table": "silver.stores"
     },
     {
       "path": "outputs/D0/foundation/products.csv",
@@ -708,7 +710,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "core.products"
+      "source_table": "core.products",
+      "table": "silver.products"
     },
     {
       "path": "outputs/D0/foundation/orders.csv",
@@ -745,7 +748,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "core.orders"
+      "source_table": "core.orders",
+      "table": "silver.orders"
     },
     {
       "path": "outputs/D0/foundation/order_items.csv",
@@ -782,7 +786,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "core.order_items"
+      "source_table": "core.order_items",
+      "table": "silver.order_items"
     },
     {
       "path": "outputs/D0/foundation/payments.csv",
@@ -815,7 +820,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "core.payments"
+      "source_table": "core.payments",
+      "table": "silver.payments"
     },
     {
       "path": "outputs/D0/foundation/returns.csv",
@@ -848,7 +854,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "core.returns"
+      "source_table": "core.returns",
+      "table": "silver.returns"
     },
     {
       "path": "outputs/D0/foundation/shipments.csv",
@@ -881,7 +888,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "core.shipments"
+      "source_table": "core.shipments",
+      "table": "silver.shipments"
     },
     {
       "path": "outputs/D0/foundation/web_events.csv",
@@ -914,7 +922,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "core.web_events"
+      "source_table": "core.web_events",
+      "table": "silver.web_events"
     },
     {
       "path": "outputs/D0/foundation/campaign_touches.csv",
@@ -939,7 +948,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "core.campaign_touches"
+      "source_table": "core.campaign_touches",
+      "table": "silver.campaign_touches"
     },
     {
       "path": "outputs/D0/daily_revenue/daily_revenue.csv",
@@ -969,7 +979,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.daily_revenue"
+      "source_table": "mart.daily_revenue",
+      "table": "gold.daily_revenue"
     },
     {
       "path": "outputs/D0/daily_revenue/report.csv",
@@ -1035,7 +1046,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.customer_ltv"
+      "source_table": "mart.customer_ltv",
+      "table": "gold.customer_ltv"
     },
     {
       "path": "outputs/D0/customer_ltv/report.csv",
@@ -1102,7 +1114,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.geo_rollup"
+      "source_table": "mart.geo_rollup",
+      "table": "gold.geo_rollup"
     },
     {
       "path": "outputs/D0/geo_rollup/report.csv",
@@ -1165,7 +1178,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.churn_flags"
+      "source_table": "mart.churn_flags",
+      "table": "gold.churn_flags"
     },
     {
       "path": "outputs/D0/churn_flags/report.csv",
@@ -1222,7 +1236,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.product_perf"
+      "source_table": "mart.product_perf",
+      "table": "gold.product_perf"
     },
     {
       "path": "outputs/D0/product_perf/report.csv",
@@ -1288,7 +1303,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.store_weekly"
+      "source_table": "mart.store_weekly",
+      "table": "gold.store_weekly"
     },
     {
       "path": "outputs/D0/store_weekly/report.csv",
@@ -1349,7 +1365,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.category_mix"
+      "source_table": "mart.category_mix",
+      "table": "gold.category_mix"
     },
     {
       "path": "outputs/D0/category_mix/report.csv",
@@ -1403,7 +1420,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.basket_affinity"
+      "source_table": "mart.basket_affinity",
+      "table": "gold.basket_affinity"
     },
     {
       "path": "outputs/D0/basket_affinity/report.csv",
@@ -1470,7 +1488,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.web_sessions"
+      "source_table": "mart.web_sessions",
+      "table": "gold.web_sessions"
     },
     {
       "path": "outputs/D0/sessionization/report.csv",
@@ -1543,7 +1562,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.shipping_sla"
+      "source_table": "mart.shipping_sla",
+      "table": "gold.shipping_sla"
     },
     {
       "path": "outputs/D0/shipping_sla/report.csv",
@@ -1628,7 +1648,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.rfm_segments"
+      "source_table": "mart.rfm_segments",
+      "table": "gold.rfm_segments"
     },
     {
       "path": "outputs/D0/rfm_segments/report.csv",
@@ -1685,7 +1706,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.promo_lift"
+      "source_table": "mart.promo_lift",
+      "table": "gold.promo_lift"
     },
     {
       "path": "outputs/D0/promo_lift/report.csv",
@@ -1750,7 +1772,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.payment_mix"
+      "source_table": "mart.payment_mix",
+      "table": "gold.payment_mix"
     },
     {
       "path": "outputs/D0/payment_mix/report.csv",
@@ -1807,7 +1830,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.returns_rate"
+      "source_table": "mart.returns_rate",
+      "table": "gold.returns_rate"
     },
     {
       "path": "outputs/D0/returns_rate/report.csv",
@@ -1869,7 +1893,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.attribution"
+      "source_table": "mart.attribution",
+      "table": "gold.attribution"
     },
     {
       "path": "outputs/D0/attribution/report.csv",
@@ -1922,7 +1947,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.inventory_snapshot"
+      "source_table": "mart.inventory_snapshot",
+      "table": "gold.inventory_snapshot"
     },
     {
       "path": "outputs/D0/inventory_snapshot/report.csv",
@@ -1983,7 +2009,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.finance_monthly"
+      "source_table": "mart.finance_monthly",
+      "table": "gold.finance_monthly"
     },
     {
       "path": "outputs/D0/finance_export/report.csv",
@@ -2042,7 +2069,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.cohort_retention"
+      "source_table": "mart.cohort_retention",
+      "table": "gold.cohort_retention"
     },
     {
       "path": "outputs/D0/cohort_retention/report.csv",
@@ -2116,7 +2144,8 @@
       ],
       "reused_from_legacy_run": true,
       "matches_committed_golden": true,
-      "source_table": "mart.exec_summary"
+      "source_table": "mart.exec_summary",
+      "table": "gold.exec_summary"
     },
     {
       "path": "outputs/D0/orchestration/report.csv",

@@ -1,7 +1,7 @@
 {
   "capture_id": "20261110T142433Z",
   "staging_path": "/Volumes/daiwt_03_mig_prod/landing/golden/_staging/20261110T142433Z/",
-  "manifest_sha256": "7dded69439a5a009a7ead71a90a9831e2dca401e1d85f1e1e8a38756787bcb7e",
+  "manifest_sha256": "23be1d850aea6ae6e280d6b61ab13a51e0ad2f29ad97481cafd76a6435f33c8b",
   "profile": {
     "engine": "Amazon Redshift Serverless",
     "version": "PostgreSQL 8.0.2 on i686-pc-linux-gnu, compiled by GCC gcc (GCC) 3.4.2 20041017 (Red Hat 3.4.2-6.fc3), Redshift 1.0.535482",
@@ -557,5 +557,10 @@
       }
     ],
     "note": "Legacy runner completed (setup, build, capture, 'done'); the original ad-hoc launcher exited 1 afterwards while writing sessions.json (relative path after chdir); sessions.json reconstructed from the launcher's per-session timezone log lines."
+  },
+  "manifest_revision": {
+    "superseded_sha256": "7dded69439a5a009a7ead71a90a9831e2dca401e1d85f1e1e8a38756787bcb7e",
+    "reason": "added explicit target table to output file entries before promotion; data files unchanged",
+    "superseded_manifest_path": "run/manifest.superseded.json"
   }
 }

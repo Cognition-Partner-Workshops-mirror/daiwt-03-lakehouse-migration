@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from parity.parity_check import compare
+from parity.parity_check import compare, output_entries
 
 SPEC = importlib.util.spec_from_file_location(
     "capture_redshift", Path(__file__).resolve().parents[1] / "golden/capture_redshift.py")
@@ -109,6 +109,24 @@ def test_manifest_parity_contract():
     assert manifest["skipped_branches"][0]["path"].endswith("export.sql")
     empty = capture.build_manifest({}, [], {"waves": [], "units": {}}, "2026-11-10T14:24:33Z")
     assert compare(empty, {}, None, None)["goldens"] == 0
+
+
+def test_manifest_file_entries_have_explicit_target_tables():
+    units = {"waves": [{"units": ["foundation", "daily_revenue"]}], "units": {
+        "foundation": {"outputs": [{"name": "customers", "table": "silver.customers"}]},
+        "daily_revenue": {"outputs": [{"name": "daily_revenue", "table": "gold.daily_revenue"},
+                                      {"name": "report"}]}}}
+    files = [{"path": path, "columns": [{"name": "id", "redshift_type": "int4"}]}
+             for path in ("inputs/D0/core.customers.csv", "outputs/D0/foundation/customers.csv",
+                          "outputs/D0/daily_revenue/daily_revenue.csv", "outputs/D0/daily_revenue/report.csv")]
+    manifest = capture.build_manifest({}, files, units, "2026-11-10T14:24:33Z")
+    outputs = output_entries(manifest, "D0")
+    assert [entry["table"] for entry in outputs[:2]] == ["silver.customers", "gold.daily_revenue"]
+    assert {entry["path"]: entry["table"] for entry in manifest["files"] if "table" in entry} == {
+        entry["path"]: entry["table"] for entry in manifest["tables"]}
+    assert "table" not in manifest["files"][0]
+    assert "table" not in manifest["files"][-1]
+    assert all("table" not in entry for entry in files)
 
 
 class Client:
