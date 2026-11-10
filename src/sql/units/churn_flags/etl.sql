@@ -1,4 +1,4 @@
--- churn_flags: set-based port of sp_build_churn_flags (per-customer loop has no cross-row state).
+-- churn_flags: set-based port of sp_build_churn_flags (the per-customer loop has no cross-row state).
 CREATE OR REPLACE TABLE IDENTIFIER(:catalog || '.' || :gold_schema || '.churn_flags') (
   customer_id      BIGINT,
   last_order_date  DATE,

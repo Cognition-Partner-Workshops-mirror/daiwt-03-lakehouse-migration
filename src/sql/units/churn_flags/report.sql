@@ -1,4 +1,4 @@
--- report_churn_flags: churn flag distribution; integer AVG truncates toward zero.
+-- report_churn_flags: churn flag distribution, integer AVG truncates toward zero.
 CREATE OR REPLACE TABLE IDENTIFIER(:catalog || '.' || :gold_schema || '.report_churn_flags')
 USING DELTA
 AS
