@@ -1,0 +1,626 @@
+{
+  "units": [
+    {
+      "name": "foundation",
+      "wave": "0",
+      "layer": "bronze+silver",
+      "depends_on": [],
+      "reads": [],
+      "outputs": [
+        {
+          "name": "customers",
+          "golden": "golden/foundation/customers.csv",
+          "target_table": "silver.customers"
+        },
+        {
+          "name": "stores",
+          "golden": "golden/foundation/stores.csv",
+          "target_table": "silver.stores"
+        },
+        {
+          "name": "products",
+          "golden": "golden/foundation/products.csv",
+          "target_table": "silver.products"
+        },
+        {
+          "name": "orders",
+          "golden": "golden/foundation/orders.csv",
+          "target_table": "silver.orders"
+        },
+        {
+          "name": "order_items",
+          "golden": "golden/foundation/order_items.csv",
+          "target_table": "silver.order_items"
+        },
+        {
+          "name": "payments",
+          "golden": "golden/foundation/payments.csv",
+          "target_table": "silver.payments"
+        },
+        {
+          "name": "returns",
+          "golden": "golden/foundation/returns.csv",
+          "target_table": "silver.returns"
+        },
+        {
+          "name": "shipments",
+          "golden": "golden/foundation/shipments.csv",
+          "target_table": "silver.shipments"
+        },
+        {
+          "name": "web_events",
+          "golden": "golden/foundation/web_events.csv",
+          "target_table": "silver.web_events"
+        },
+        {
+          "name": "campaign_touches",
+          "golden": "golden/foundation/campaign_touches.csv",
+          "target_table": "silver.campaign_touches"
+        }
+      ],
+      "owned_raw_tables": [
+        "bronze.customers",
+        "bronze.stores",
+        "bronze.products",
+        "bronze.orders",
+        "bronze.order_items",
+        "bronze.payments",
+        "bronze.returns",
+        "bronze.shipments",
+        "bronze.web_events",
+        "bronze.campaign_touches"
+      ],
+      "target_tables": [
+        "silver.customers",
+        "silver.stores",
+        "silver.products",
+        "silver.orders",
+        "silver.order_items",
+        "silver.payments",
+        "silver.returns",
+        "silver.shipments",
+        "silver.web_events",
+        "silver.campaign_touches"
+      ]
+    },
+    {
+      "name": "daily_revenue",
+      "wave": "1a",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.orders",
+        "silver.order_items"
+      ],
+      "outputs": [
+        {
+          "name": "daily_revenue",
+          "golden": "golden/daily_revenue/daily_revenue.csv",
+          "target_table": "gold.daily_revenue"
+        },
+        {
+          "name": "report",
+          "golden": "golden/daily_revenue/report.csv",
+          "target_table": "gold.report_daily_revenue"
+        }
+      ],
+      "target_tables": [
+        "gold.daily_revenue",
+        "gold.report_daily_revenue"
+      ]
+    },
+    {
+      "name": "customer_ltv",
+      "wave": "1a",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.customers",
+        "silver.orders",
+        "silver.order_items"
+      ],
+      "outputs": [
+        {
+          "name": "customer_ltv",
+          "golden": "golden/customer_ltv/customer_ltv.csv",
+          "target_table": "gold.customer_ltv"
+        },
+        {
+          "name": "report",
+          "golden": "golden/customer_ltv/report.csv",
+          "target_table": "gold.report_customer_ltv"
+        }
+      ],
+      "target_tables": [
+        "gold.customer_ltv",
+        "gold.report_customer_ltv"
+      ]
+    },
+    {
+      "name": "geo_rollup",
+      "wave": "1a",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.stores",
+        "silver.orders",
+        "silver.order_items"
+      ],
+      "outputs": [
+        {
+          "name": "geo_rollup",
+          "golden": "golden/geo_rollup/geo_rollup.csv",
+          "target_table": "gold.geo_rollup"
+        },
+        {
+          "name": "report",
+          "golden": "golden/geo_rollup/report.csv",
+          "target_table": "gold.report_geo_rollup"
+        }
+      ],
+      "target_tables": [
+        "gold.geo_rollup",
+        "gold.report_geo_rollup"
+      ]
+    },
+    {
+      "name": "churn_flags",
+      "wave": "1a",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.customers",
+        "silver.orders"
+      ],
+      "outputs": [
+        {
+          "name": "churn_flags",
+          "golden": "golden/churn_flags/churn_flags.csv",
+          "target_table": "gold.churn_flags"
+        },
+        {
+          "name": "report",
+          "golden": "golden/churn_flags/report.csv",
+          "target_table": "gold.report_churn_flags"
+        }
+      ],
+      "target_tables": [
+        "gold.churn_flags",
+        "gold.report_churn_flags"
+      ]
+    },
+    {
+      "name": "product_perf",
+      "wave": "1a",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.order_items",
+        "silver.orders",
+        "silver.stores",
+        "silver.products"
+      ],
+      "outputs": [
+        {
+          "name": "product_perf",
+          "golden": "golden/product_perf/product_perf.csv",
+          "target_table": "gold.product_perf"
+        },
+        {
+          "name": "report",
+          "golden": "golden/product_perf/report.csv",
+          "target_table": "gold.report_product_perf"
+        }
+      ],
+      "target_tables": [
+        "gold.product_perf",
+        "gold.report_product_perf"
+      ]
+    },
+    {
+      "name": "store_weekly",
+      "wave": "1b",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.orders",
+        "silver.order_items",
+        "silver.stores"
+      ],
+      "outputs": [
+        {
+          "name": "store_weekly",
+          "golden": "golden/store_weekly/store_weekly.csv",
+          "target_table": "gold.store_weekly"
+        },
+        {
+          "name": "report",
+          "golden": "golden/store_weekly/report.csv",
+          "target_table": "gold.report_store_weekly"
+        }
+      ],
+      "target_tables": [
+        "gold.store_weekly",
+        "gold.report_store_weekly"
+      ]
+    },
+    {
+      "name": "category_mix",
+      "wave": "1b",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.order_items",
+        "silver.products"
+      ],
+      "outputs": [
+        {
+          "name": "category_mix",
+          "golden": "golden/category_mix/category_mix.csv",
+          "target_table": "gold.category_mix"
+        },
+        {
+          "name": "report",
+          "golden": "golden/category_mix/report.csv",
+          "target_table": "gold.report_category_mix"
+        }
+      ],
+      "target_tables": [
+        "gold.category_mix",
+        "gold.report_category_mix"
+      ]
+    },
+    {
+      "name": "basket_affinity",
+      "wave": "1b",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.order_items",
+        "silver.products"
+      ],
+      "outputs": [
+        {
+          "name": "basket_affinity",
+          "golden": "golden/basket_affinity/basket_affinity.csv",
+          "target_table": "gold.basket_affinity"
+        },
+        {
+          "name": "report",
+          "golden": "golden/basket_affinity/report.csv",
+          "target_table": "gold.report_basket_affinity"
+        }
+      ],
+      "target_tables": [
+        "gold.basket_affinity",
+        "gold.report_basket_affinity"
+      ]
+    },
+    {
+      "name": "sessionization",
+      "wave": "1b",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.web_events"
+      ],
+      "outputs": [
+        {
+          "name": "web_sessions",
+          "golden": "golden/sessionization/web_sessions.csv",
+          "target_table": "gold.web_sessions"
+        },
+        {
+          "name": "report",
+          "golden": "golden/sessionization/report.csv",
+          "target_table": "gold.report_sessionization"
+        }
+      ],
+      "target_tables": [
+        "gold.web_sessions",
+        "gold.report_sessionization"
+      ]
+    },
+    {
+      "name": "shipping_sla",
+      "wave": "1b",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.shipments"
+      ],
+      "outputs": [
+        {
+          "name": "shipping_sla",
+          "golden": "golden/shipping_sla/shipping_sla.csv",
+          "target_table": "gold.shipping_sla"
+        },
+        {
+          "name": "report",
+          "golden": "golden/shipping_sla/report.csv",
+          "target_table": "gold.report_shipping_sla"
+        }
+      ],
+      "target_tables": [
+        "gold.shipping_sla",
+        "gold.report_shipping_sla"
+      ]
+    },
+    {
+      "name": "rfm_segments",
+      "wave": "1b",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.customers",
+        "silver.orders",
+        "silver.order_items"
+      ],
+      "outputs": [
+        {
+          "name": "rfm_segments",
+          "golden": "golden/rfm_segments/rfm_segments.csv",
+          "target_table": "gold.rfm_segments"
+        },
+        {
+          "name": "report",
+          "golden": "golden/rfm_segments/report.csv",
+          "target_table": "gold.report_rfm_segments"
+        }
+      ],
+      "target_tables": [
+        "gold.rfm_segments",
+        "gold.report_rfm_segments"
+      ]
+    },
+    {
+      "name": "promo_lift",
+      "wave": "1b",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.orders",
+        "silver.order_items"
+      ],
+      "outputs": [
+        {
+          "name": "promo_lift",
+          "golden": "golden/promo_lift/promo_lift.csv",
+          "target_table": "gold.promo_lift"
+        },
+        {
+          "name": "report",
+          "golden": "golden/promo_lift/report.csv",
+          "target_table": "gold.report_promo_lift"
+        }
+      ],
+      "target_tables": [
+        "gold.promo_lift",
+        "gold.report_promo_lift"
+      ]
+    },
+    {
+      "name": "payment_mix",
+      "wave": "1b",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.payments"
+      ],
+      "outputs": [
+        {
+          "name": "payment_mix",
+          "golden": "golden/payment_mix/payment_mix.csv",
+          "target_table": "gold.payment_mix"
+        },
+        {
+          "name": "report",
+          "golden": "golden/payment_mix/report.csv",
+          "target_table": "gold.report_payment_mix"
+        }
+      ],
+      "target_tables": [
+        "gold.payment_mix",
+        "gold.report_payment_mix"
+      ]
+    },
+    {
+      "name": "returns_rate",
+      "wave": "1b",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.order_items",
+        "silver.products",
+        "silver.returns"
+      ],
+      "outputs": [
+        {
+          "name": "returns_rate",
+          "golden": "golden/returns_rate/returns_rate.csv",
+          "target_table": "gold.returns_rate"
+        },
+        {
+          "name": "report",
+          "golden": "golden/returns_rate/report.csv",
+          "target_table": "gold.report_returns_rate"
+        }
+      ],
+      "target_tables": [
+        "gold.returns_rate",
+        "gold.report_returns_rate"
+      ]
+    },
+    {
+      "name": "attribution",
+      "wave": "1b",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.campaign_touches"
+      ],
+      "outputs": [
+        {
+          "name": "attribution",
+          "golden": "golden/attribution/attribution.csv",
+          "target_table": "gold.attribution"
+        },
+        {
+          "name": "report",
+          "golden": "golden/attribution/report.csv",
+          "target_table": "gold.report_attribution"
+        }
+      ],
+      "target_tables": [
+        "gold.attribution",
+        "gold.report_attribution"
+      ]
+    },
+    {
+      "name": "inventory_snapshot",
+      "wave": "1b",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.order_items",
+        "silver.products"
+      ],
+      "outputs": [
+        {
+          "name": "inventory_snapshot",
+          "golden": "golden/inventory_snapshot/inventory_snapshot.csv",
+          "target_table": "gold.inventory_snapshot"
+        },
+        {
+          "name": "report",
+          "golden": "golden/inventory_snapshot/report.csv",
+          "target_table": "gold.report_inventory_snapshot"
+        }
+      ],
+      "target_tables": [
+        "gold.inventory_snapshot",
+        "gold.report_inventory_snapshot"
+      ]
+    },
+    {
+      "name": "finance_export",
+      "wave": "1b",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.orders",
+        "silver.order_items"
+      ],
+      "outputs": [
+        {
+          "name": "finance_monthly",
+          "golden": "golden/finance_export/finance_monthly.csv",
+          "target_table": "gold.finance_monthly"
+        },
+        {
+          "name": "report",
+          "golden": "golden/finance_export/report.csv",
+          "target_table": "gold.report_finance_export"
+        }
+      ],
+      "target_tables": [
+        "gold.finance_monthly",
+        "gold.report_finance_export"
+      ]
+    },
+    {
+      "name": "cohort_retention",
+      "wave": "1b",
+      "layer": "gold",
+      "depends_on": [
+        "foundation"
+      ],
+      "reads": [
+        "silver.orders"
+      ],
+      "outputs": [
+        {
+          "name": "cohort_retention",
+          "golden": "golden/cohort_retention/cohort_retention.csv",
+          "target_table": "gold.cohort_retention"
+        },
+        {
+          "name": "report",
+          "golden": "golden/cohort_retention/report.csv",
+          "target_table": "gold.report_cohort_retention"
+        }
+      ],
+      "target_tables": [
+        "gold.cohort_retention",
+        "gold.report_cohort_retention"
+      ]
+    },
+    {
+      "name": "orchestration",
+      "wave": "2",
+      "layer": "orchestration",
+      "depends_on": [
+        "daily_revenue",
+        "customer_ltv",
+        "returns_rate",
+        "shipping_sla"
+      ],
+      "reads": [
+        "gold.daily_revenue",
+        "gold.customer_ltv",
+        "gold.returns_rate",
+        "gold.shipping_sla"
+      ],
+      "outputs": [
+        {
+          "name": "exec_summary",
+          "golden": "golden/orchestration/exec_summary.csv",
+          "target_table": "gold.exec_summary"
+        },
+        {
+          "name": "report",
+          "golden": "golden/orchestration/report.csv",
+          "target_table": "gold.report_orchestration"
+        }
+      ],
+      "target_tables": [
+        "gold.exec_summary",
+        "gold.report_orchestration"
+      ]
+    }
+  ]
+}
