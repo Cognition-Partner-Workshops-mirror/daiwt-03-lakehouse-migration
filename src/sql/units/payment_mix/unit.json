@@ -1,0 +1,12 @@
+{
+  "job": "payment_mix",
+  "legacy_unit": "payment_mix",
+  "outputs": [
+    "gold.payment_mix",
+    "gold.report_payment_mix"
+  ],
+  "owns": [],
+  "depends_on": [
+    "silver_payments"
+  ]
+}
