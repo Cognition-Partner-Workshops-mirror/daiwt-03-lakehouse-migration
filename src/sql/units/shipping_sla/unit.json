@@ -1,0 +1,12 @@
+{
+  "job": "shipping_sla",
+  "legacy_unit": "shipping_sla",
+  "outputs": [
+    "gold.shipping_sla",
+    "gold.report_shipping_sla"
+  ],
+  "owns": [],
+  "depends_on": [
+    "silver_shipments"
+  ]
+}
