@@ -4,6 +4,8 @@ bundle:
 include: [src/sql/units/*/*.yml]
 
 variables:
+  data_owner:
+    default: ${workspace.current_user.userName}
   catalog:
     description: Target Unity Catalog catalog.
   schema_suffix:
@@ -25,6 +27,11 @@ variables:
 targets:
   dev:
     default: true
+    permissions:
+      - service_principal_name: ${workspace.current_user.userName}
+        level: CAN_MANAGE
+      - group_name: users
+        level: CAN_VIEW
     presets:
       trigger_pause_status: PAUSED
     workspace:
