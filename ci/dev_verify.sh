@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+python -c 'import databricks.bundles' || { echo 'Install requirements-dev.txt in the active Python environment' >&2; exit 1; }
 suffix=${1:?usage: ci/dev_verify.sh pr_<number> [units]}
 [[ $suffix =~ ^pr_[0-9]+$ ]] || { echo "invalid PR suffix" >&2; exit 2; }
 [[ -z $(git status --porcelain) ]] || { echo "worktree must be clean" >&2; exit 1; }

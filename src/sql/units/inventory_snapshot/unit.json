@@ -1,0 +1,13 @@
+{
+  "job": "inventory_snapshot",
+  "legacy_unit": "inventory_snapshot",
+  "outputs": [
+    "gold.inventory_snapshot",
+    "gold.report_inventory_snapshot"
+  ],
+  "owns": [],
+  "depends_on": [
+    "silver_order_items",
+    "silver_products"
+  ]
+}
