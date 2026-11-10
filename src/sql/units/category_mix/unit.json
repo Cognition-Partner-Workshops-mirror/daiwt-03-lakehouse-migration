@@ -1,0 +1,13 @@
+{
+  "job": "category_mix",
+  "legacy_unit": "category_mix",
+  "outputs": [
+    "gold.category_mix",
+    "gold.report_category_mix"
+  ],
+  "owns": [],
+  "depends_on": [
+    "silver_order_items",
+    "silver_products"
+  ]
+}
