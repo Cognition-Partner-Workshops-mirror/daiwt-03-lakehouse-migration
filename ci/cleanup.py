@@ -59,6 +59,24 @@ def drop_tables(warehouse, registry, units=None, suffix=None, prod=False):
                     raise
 
 
+def cleanup_pr(warehouse, suffix, schemas):
+    if not isinstance(suffix, str) or not re.fullmatch(r"pr_[0-9]+", suffix):
+        raise ValueError("invalid PR suffix")
+    errors = []
+    for name in candidates(schemas, None, suffix):
+        try:
+            warehouse.sql(f"DROP SCHEMA IF EXISTS `daiwt_03_mig_dev`.{identifier(name)} CASCADE")
+            print(f"Dropped schema daiwt_03_mig_dev.{name}")
+        except Exception as exc:
+            errors.append(f"{name}: {exc}")
+    try:
+        subprocess.run(["databricks", "bundle", "destroy", "-t", "dev", "--var",
+                        f"schema_suffix={suffix}", "--auto-approve"], check=True)
+    except (subprocess.CalledProcessError, OSError) as exc:
+        errors.append(f"bundle destroy {suffix}: {exc}")
+    return errors
+
+
 def main():
     from databricks.sdk import WorkspaceClient
     parser = argparse.ArgumentParser()
@@ -87,13 +105,11 @@ def main():
         closed = {pr["number"] for page in pages for pr in page}
     schemas = list(client.schemas.list(catalog_name="daiwt_03_mig_dev"))
     suffixes = sorted({"pr_" + name.rsplit("_", 1)[1] for name in candidates(schemas, closed, args.suffix)})
+    errors = []
     for suffix in suffixes:
-        subprocess.run(["databricks", "bundle", "destroy", "-t", "dev", "--var",
-                        f"schema_suffix={suffix}", "--auto-approve"], check=True)
-        # Also remove verified, marked schemas if the deployment state was already removed.
-        for name in candidates(schemas, closed, args.suffix):
-            if name.endswith("_" + suffix):
-                warehouse.sql(f"DROP SCHEMA IF EXISTS `daiwt_03_mig_dev`.{identifier(name)} CASCADE")
+        errors.extend(cleanup_pr(warehouse, suffix, schemas))
+    if errors:
+        raise RuntimeError("PR cleanup failed: " + "; ".join(errors))
 
 
 if __name__ == "__main__":
