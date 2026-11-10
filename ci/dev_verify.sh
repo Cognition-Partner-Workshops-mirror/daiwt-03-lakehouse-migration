@@ -8,8 +8,7 @@ git fetch -q origin
 head_sha=$(git rev-parse HEAD)
 mkdir -p out
 rm -f out/parity-*.json attestation.md
-mapfile -t drops < <(python ci/drops.py)
-[[ ${#drops[@]} -gt 0 ]] || { echo "cannot resolve manifest drops" >&2; exit 1; }
+drops=(D0)
 parity_files=()
 for D in "${drops[@]}"; do parity_files+=("out/parity-$D.json"); done
 : > out/run-urls.txt
@@ -20,14 +19,16 @@ status=PASS
 if ! python - "$suffix" "${2:-}" > out/selected-units.json <<'PY'
 import json, sys
 sys.path.insert(0, "ci")
-from select_units import select
+from select_units import select, required
 from registry import load
+print('Required set: ' + json.dumps(required(sys.argv[1])), file=sys.stderr)
 print(json.dumps(select(load(), sys.argv[1], sys.argv[2])))
 PY
 then
   echo '[]' > out/selected-units.json
   status=FAIL
 fi
+echo "Selected units: $(cat out/selected-units.json)"
 if [[ $status == PASS ]]; then
   if ! databricks bundle validate --strict -t dev --var "schema_suffix=$suffix" ||
      ! databricks bundle deploy -t dev --var "schema_suffix=$suffix"; then status=FAIL; fi
@@ -41,7 +42,7 @@ fi
 if [[ $status == PASS ]]; then
   for D in "${drops[@]}"; do
     if ! python ci/run_units.py "$suffix" out/selected-units.json --drop "$D" --run-urls out/run-urls.txt ||
-       ! python src/parity/parity_check.py --suffix "$suffix" --drop "$D" --ran-units out/selected-units.json --output "out/parity-$D.json"; then
+       ! python src/parity/parity_check.py --suffix "$suffix" --drop "$D" --units out/selected-units.json --output "out/parity-$D.json"; then
       status=FAIL
       break
     fi

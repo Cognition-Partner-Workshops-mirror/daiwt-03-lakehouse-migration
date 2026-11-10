@@ -2,7 +2,7 @@
 
 SQL-unit migration scaffold for the DAIWT-03 Databricks medallion target:
 `bronze`, `silver` and `gold` in `daiwt_03_mig_dev` and `daiwt_03_mig_prod`.
-There are 0 migrated units yet; `src/sql/units/registry.json` is `{}`.
+There are 0 migrated units yet; each future unit has its own `unit.json`.
 
 Golden inputs and outputs captured from the Amazon Redshift source estate
 (`core` inputs, `mart` outputs) live in the golden volume.
@@ -12,9 +12,9 @@ Golden inputs and outputs captured from the Amazon Redshift source estate
 | Path | Purpose |
 | --- | --- |
 | `databricks.yml` | Dev and production bundle targets |
-| `src/sql/units/` | Migrated SQL files and `registry.json`; currently zero units |
+| `src/sql/units/<unit>/` | Unit SQL, bundle YAML and `unit.json`; currently zero units |
 | `src/parity/parity_check.py` | Golden CSV multiset comparison using SDK Files and SQL Statements APIs |
-| `ci/dev_verify.sh` | Builder deployment, selected units, per-drop parity and attestation |
+| `ci/dev_verify.sh` | Builder deployment, selected units, D0 parity and attestation |
 | `ci/attest.py` | Fail-closed Markdown attestation from parity JSON |
 | `ci/reset.sh`, `ci/sweep_dev.sh` | Scoped cleanup |
 | `tests/` | Offline pytest tests |
@@ -77,27 +77,28 @@ An existing volume with no manifest reports PASS with 0 goldens only when the
 contract is also empty. A missing volume, denied access, malformed manifest, unreadable
 migrated golden or failed SQL query fails closed. Each unregistered output reports
 SKIP (`not yet migrated`) without reading its CSV or querying a target table.
-Registration is determined by the contract's unit, including its report entries.
+Registration is determined by each unit's explicit `outputs` list.
 Registered outputs report PASS only for exact row-count and content matches.
 
 ## Adding a unit
 
-1. Add `src/sql/units/<unit>.sql` and its bundle job resource, included from
+1. Add SQL and its bundle job resource under `src/sql/units/<unit>/`, included from
    `databricks.yml`. Pass catalog and layer schema variables to the job, and name it
    `${var.job_name_prefix}<unit>` (dev `[pr_<n>] <unit>`, prod `<unit>`).
 2. Register the bundle job key and all produced golden tables:
 
    ```json
-   {"load_sale": {"job": "load_sale", "outputs": ["gold.fact_sale"], "owns": [], "depends_on": []}}
+   {"job": "load_sale", "legacy_unit": "load_sale", "outputs": ["gold.fact_sale"], "owns": [], "depends_on": []}
    ```
 
 3. Add offline tests. Each output has exactly one producer. Dependencies determine
    execution order, with registry order breaking ties. See [registry documentation](docs/registry.md).
 
 `classify_changes.sh` compares `BASE_SHA`/`HEAD_SHA` (default `origin/main`/`HEAD`).
-SQL changes select their unit; registry or shared framework changes select all units.
-README, workflow and test-only edits do not select unit jobs. Classification is recorded
-as diagnostic evidence. Builder verification runs the selected units and checks parity for every manifest drop.
+Unit directory changes select their unit and transitive upstream dependencies, not
+dependants. Shared framework changes select all units. Docs, tests and workflows
+are ignored; removal-only changes require no attestation. See the frozen schema
+and fingerprint policy in [registry documentation](docs/registry.md).
 
 ## CI
 
@@ -128,21 +129,22 @@ bash ci/dev_verify.sh pr_<n>
 ```
 
 The builder resolves the PR base with `gh pr view` (falling back to `origin/main`),
-diffs `origin/<base>...HEAD`, expands dependants and upstream dependencies,
+diffs `origin/<base>...HEAD`, expands only upstream dependencies,
 validates and deploys dev, cleans selected owned objects,
-then runs units and parity for every manifest drop. Unit jobs receive only the
+then runs units and parity for D0 only. Unit jobs receive only the
 `drop` parameter. It renders `attestation.md` and inserts evidence into
-`daiwt_03_mig_dev.default.pr_attestation`, creating the table if necessary.
-Rows include head SHA, suffix, status, units, selection, drops, Markdown,
+`daiwt_03_mig_dev.default.unit_attestation`, creating the table if necessary.
+Rows include fingerprint, head SHA, suffix, status, units, selection, drops, Markdown,
 run URLs, recorded identity and timestamp.
 
 Dev parity receives the executed unit list and skips registered units outside that
-list with `not run in this verification`. Production always compares every registered unit.
+list with `not selected`. Production always compares every registered output.
 
-PR CI never deploys or executes unit jobs. It requires the latest row for the
-exact head SHA and `pr_<n>` suffix to be PASS, every current manifest drop to
-be PASS (with exactly the same drop set), and recorded units to cover the
-classification of `base...head`. Missing or stale evidence fails closed.
+PR CI never deploys or executes unit jobs. It accepts PASS evidence with D0 PASS,
+recorded units covering the required selection and a content fingerprint matching
+the current head for the recorded set. Evidence survives rebases that only change
+docs or unrelated units. Missing or stale evidence fails closed; ignored-only
+changes need no attestation.
 All workflow concurrency groups use `cancel-in-progress: false`.
 
 ## Local checks

@@ -1,6 +1,8 @@
 bundle:
   name: daiwt-03-migration
 
+include: [src/sql/units/*/*.yml]
+
 variables:
   catalog:
     description: Target Unity Catalog catalog.
