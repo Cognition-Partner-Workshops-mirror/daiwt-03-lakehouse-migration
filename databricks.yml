@@ -6,7 +6,7 @@ python:
   resources:
     - 'silver_resources:load_resources'
 
-include: [src/sql/units/*/*.yml]
+include: [src/sql/units/*/*.yml, resources/*.yml]
 
 variables:
   silver_bad_rows:

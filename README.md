@@ -152,6 +152,45 @@ docs or unrelated units. Missing or stale evidence fails closed; ignored-only
 changes need no attestation.
 All workflow concurrency groups use `cancel-in-progress: false`.
 
+## Modernization DAG
+
+`modernization` replays the registered units for its `drop` parameter (default
+`D0`). Its nightly 02:00 UTC schedule is paused in dev and active in prod.
+The job inherits bundle permissions (`users` CAN_VIEW).
+
+Run `python ci/modernization_dag.py` after changing the registry or unit job
+resources, and commit `resources/modernization.job.yml`. Offline tests reject
+drift. Job keys come from `unit.json`; matching job resources are called with
+`drop`, or matching pipeline resources are fully refreshed with the same runtime
+`drop` parameter (which their pipeline must declare and bind with `:drop`).
+Units without either resource are omitted, with their upstream dependencies
+retained. `sql_macros` currently has a job and is included.
+
+The registered `silver_pipeline` wrapper follows `bronze_landing` and
+`silver_asof`. It fully refreshes the shared `silver` pipeline with the run's
+`drop`, then checks Silver parity. Pipeline SQL must use `:drop`, not the static
+`${drop}` configuration substitution. Each future `silver_<entity>` registers
+its own outputs/quarantine tables and a self-check job depending on this wrapper;
+its discovered `*.pipeline.sql` runs inside the shared pipeline, not a separate
+pipeline. `verify_silver` waits for the wrapper and all entity self-checks.
+
+All non-gold units finish before `verify_silver`. That visible serverless task
+strictly compares registered silver contract outputs for the selected drop;
+other registered silver tables must exist and be non-empty. With no registered
+silver tables the gate is explicitly vacuous. Gold tasks retain their registry
+dependencies and also wait for this gate. Every gold contract producer gets a
+separate strict `publish_<unit>` parity task. Governance runs last only when no
+dependencies failed. Mixed silver/gold producer units must be split to avoid a
+gate cycle. The registry describes data dependencies, not historical wave gates.
+
+Production deployment retains Devin-CI OIDC authentication, runs modernization
+for every manifest drop, and retains the existing aggregate parity artifacts
+and attestation checks.
+The final deployment gate, `python ci/check_grants.py --target prod`, reads
+deployed job ACLs and effective catalog/schema grants, including inherited
+privileges and ownership. It prints its results to the workflow summary and
+fails if required access is missing. It never changes grants.
+
 ## Local checks
 
 ```bash

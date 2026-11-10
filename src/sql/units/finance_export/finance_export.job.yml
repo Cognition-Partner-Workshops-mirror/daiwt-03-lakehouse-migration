@@ -12,9 +12,6 @@ resources:
           default: D0
       tags:
         environment: ${bundle.target}
-      schedule:
-        quartz_cron_expression: "0 0 2 * * ?"
-        timezone_id: UTC
       tasks:
         - task_key: build_finance_monthly
           sql_task:
