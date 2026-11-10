@@ -45,7 +45,10 @@ The volume contains `inputs/`, `outputs/` and `manifest.json`. The manifest form
   "files": [
     {
       "table": "gold.fact_sale",
-      "path": "outputs/fact_sale.csv",
+      "path": "outputs/D0/load_sale/fact_sale.csv",
+      "sha256": "<captured CSV hash>",
+      "row_count": 1,
+      "keys": ["sale_key"],
       "columns": [{"name": "sale_key", "redshift_type": "bigint"}, {"name": "amount", "redshift_type": "decimal"}]
     }
   ]
@@ -53,21 +56,28 @@ The volume contains `inputs/`, `outputs/` and `manifest.json`. The manifest form
 ```
 
 Drops come from manifest strings or objects with a `name`; a missing manifest defaults
-to `D0`. Files under `outputs/` (optionally `outputs/<drop>/`) are outputs.
-Both string and object column names are accepted; the original `tables` shape also works.
-An explicit `table` identifies a target; otherwise the output filename supplies its name.
+to `D0`. Files under `outputs/` are outputs; inputs are excluded.
+The checked-in `src/parity/contract.json` pins every output path and SHA-256
+to its drop, producing unit, target table, kind, keys, row count and columns.
+Generate it with `python src/parity/build_contract.py`, which reads the repository
+manifest and `~/repos/daiwt-03-redshift/.migration/units.yaml` read-only.
+Table targets are cross-checked against the unit metadata; reports target
+`gold.report_<unit>`. The capture contains **48 outputs: 29 tables and 19 reports**.
+Runtime parity rejects missing/extra manifest output paths or differing hashes
+before comparing any units. Target names are never inferred from CSV filenames.
 
 Each output is a UTF-8 CSV with a header matching the ordered `columns` array.
 Use SQL Statements API string representations for values (including decimal scale
 and timestamps); `\N` represents SQL NULL. Empty strings and NULL are distinct.
-Tables are identified by `<bronze|silver|gold>.<table>`; dev suffixes are resolved by
+Tables are identified by `<silver|gold>.<table>`; dev suffixes are resolved by
 the harness. No sampling, tolerance, deduplication or ignored columns is applied.
 Rows compare as multisets using row count and SHA-256 of sorted canonical JSON rows.
 
-An existing volume with no manifest, or a manifest with `{"tables": []}`, reports
-PASS with 0 goldens. A missing volume, denied access, malformed manifest, unreadable
+An existing volume with no manifest reports PASS with 0 goldens only when the
+contract is also empty. A missing volume, denied access, malformed manifest, unreadable
 migrated golden or failed SQL query fails closed. Each unregistered output reports
 SKIP (`not yet migrated`) without reading its CSV or querying a target table.
+Registration is determined by the contract's unit, including its report entries.
 Registered outputs report PASS only for exact row-count and content matches.
 
 ## Adding a unit
@@ -117,13 +127,17 @@ bash ci/dev_verify.sh pr_<n>
 # All units: bash ci/dev_verify.sh pr_<n> '*'
 ```
 
-The builder selects changed units against the merge-base with `origin/main`,
-expands dependants, validates and deploys dev, cleans selected owned objects,
+The builder resolves the PR base with `gh pr view` (falling back to `origin/main`),
+diffs `origin/<base>...HEAD`, expands dependants and upstream dependencies,
+validates and deploys dev, cleans selected owned objects,
 then runs units and parity for every manifest drop. Unit jobs receive only the
 `drop` parameter. It renders `attestation.md` and inserts evidence into
 `daiwt_03_mig_dev.default.pr_attestation`, creating the table if necessary.
 Rows include head SHA, suffix, status, units, selection, drops, Markdown,
 run URLs, recorded identity and timestamp.
+
+Dev parity receives the executed unit list and skips registered units outside that
+list with `not run in this verification`. Production always compares every registered unit.
 
 PR CI never deploys or executes unit jobs. It requires the latest row for the
 exact head SHA and `pr_<n>` suffix to be PASS, every current manifest drop to

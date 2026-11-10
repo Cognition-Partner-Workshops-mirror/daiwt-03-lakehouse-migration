@@ -6,7 +6,7 @@ from databricks.sdk.errors import NotFound, PermissionDenied
 
 from parity.parity_check import GoldenStore, compare, digest, identifier, Warehouse
 
-ENTRY = {"table": "gold.fact_sale", "path": "outputs/fact_sale.csv", "columns": ["id", "amount"]}
+ENTRY = {"unit": "load_sale", "table": "gold.fact_sale", "path": "outputs/fact_sale.csv", "columns": ["id", "amount"]}
 REGISTRY = {"load_sale": {"outputs": ["gold.fact_sale"], "job": "load_sale"}}
 
 
