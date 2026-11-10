@@ -1,0 +1,12 @@
+name: basket_affinity
+layer: gold
+sql:
+  - etl.sql
+  - report.sql
+outputs:
+  - table: gold.basket_affinity
+    golden: outputs/D0/basket_affinity/basket_affinity.csv
+    keys: [product_id_a, product_id_b]
+  - table: gold.report_basket_affinity
+    golden: outputs/D0/basket_affinity/report.csv
+    keys: [product_id_a, product_id_b]
