@@ -1,0 +1,13 @@
+{
+  "job": "promo_lift",
+  "legacy_unit": "promo_lift",
+  "outputs": [
+    "gold.promo_lift",
+    "gold.report_promo_lift"
+  ],
+  "owns": [],
+  "depends_on": [
+    "silver_order_items",
+    "silver_orders"
+  ]
+}
