@@ -211,6 +211,9 @@ def run(client, catalog, suffix, warehouse_id, registry, drop="D0", *, contract=
         return warehouse.sql(f"SELECT {columns} FROM {identifier(catalog)}.{identifier(schema)}.{identifier(table)}")
 
     contract = contract if contract is not None else json.loads((ROOT / "src/parity/contract.json").read_text())
+    unknown = set(registry) - {entry["unit"] for entry in contract["outputs"]}
+    if unknown:
+        raise ValueError("registered units absent from parity contract: " + ", ".join(sorted(unknown)))
     entries = contract_entries(contract, store.manifest(), drop)
     result = compare({"tables": entries}, registry, store.rows, actual,
                      ran_units if catalog.endswith("_dev") else None)

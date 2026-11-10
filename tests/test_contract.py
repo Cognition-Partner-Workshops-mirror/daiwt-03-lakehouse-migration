@@ -43,6 +43,34 @@ def test_empty_registry_skips_every_output():
     assert {r["reason"] for r in result["results"]} == {"not yet migrated"}
 
 
+@pytest.mark.parametrize("catalog", ["daiwt_03_mig_dev", "daiwt_03_mig_prod"])
+def test_unknown_registered_unit_rejected(catalog):
+    with pytest.raises(ValueError, match="registered units absent from parity contract: typo_unit"):
+        run(client(MANIFEST), catalog, "pr_1", "w",
+            {"typo_unit": {"outputs": []}}, ran_units=[])
+
+
+def test_unknown_registered_unit_cli_fails(monkeypatch, tmp_path, capsys):
+    import sys
+    import databricks.sdk
+    from parity import parity_check
+    for directory, content in [("src/sql/units", {"typo_unit": {"outputs": []}}),
+                               ("src/parity", CONTRACT)]:
+        target = tmp_path / directory
+        target.mkdir(parents=True)
+        filename = "registry.json" if directory.endswith("units") else "contract.json"
+        (target / filename).write_text(json.dumps(content))
+    monkeypatch.setattr(parity_check, "ROOT", tmp_path)
+    monkeypatch.setattr(databricks.sdk, "WorkspaceClient", lambda **_: client(MANIFEST))
+    output = tmp_path / "result.json"
+    monkeypatch.setattr(sys, "argv", ["parity_check", "--output", str(output)])
+    assert parity_check.main() == 1
+    result = json.loads(output.read_text())
+    assert result["status"] == "FAIL"
+    assert result["error"] == "registered units absent from parity contract: typo_unit"
+    assert result["error"] in capsys.readouterr().out
+
+
 @pytest.mark.parametrize("mutation", ["missing", "extra", "sha256", "duplicate"])
 def test_volume_manifest_drift_fails_closed(mutation):
     manifest = copy.deepcopy(MANIFEST)
