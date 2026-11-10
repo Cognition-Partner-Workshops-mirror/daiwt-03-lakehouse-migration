@@ -7,6 +7,8 @@
   ],
   "owns": [],
   "depends_on": [
-    "silver_asof"
+    "silver_order_items",
+    "silver_orders",
+    "silver_stores"
   ]
 }
