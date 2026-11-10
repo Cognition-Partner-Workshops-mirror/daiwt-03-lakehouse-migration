@@ -1,1 +1,0 @@
-{"job":"silver_web_events","legacy_unit":"foundation","outputs":["silver.web_events"],"owns":["silver.web_events_quarantine"],"depends_on":["silver_pipeline","silver_asof"]}

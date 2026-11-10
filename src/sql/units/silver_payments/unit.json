@@ -1,1 +1,0 @@
-{"job":"silver_payments","legacy_unit":"foundation","outputs":["silver.payments"],"owns":["silver.payments_quarantine"],"depends_on":["silver_pipeline","silver_asof"]}
