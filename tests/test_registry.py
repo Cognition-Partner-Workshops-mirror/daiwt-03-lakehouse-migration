@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -7,15 +8,15 @@ from registry import load, tables, topo_order, validate
 from run_units import run_units
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACT = ["gold.city"]
+CONTRACT = {'outputs': [{'table': 'gold.city', 'unit': 'foundation'}]}
 
 
 def spec(job="build", outputs=None, owns=None, depends_on=None):
-    return dict(job=job, outputs=outputs or [], owns=owns or [], depends_on=depends_on or [])
+    return dict(job=job, legacy_unit='foundation', outputs=outputs or [], owns=owns or [], depends_on=depends_on or [])
 
 
 def test_real_registry():
-    assert load(ROOT / "src/sql/units/registry.json") == {}
+    validate(load(ROOT), json.loads((ROOT / 'src/parity/contract.json').read_text()))
 
 
 def test_valid():
@@ -71,13 +72,13 @@ def test_cross_ownership():
 
 
 def test_load_invalid(tmp_path):
-    path = tmp_path / "registry.json"
-    path.write_text('[]')
-    with pytest.raises(ValueError, match="JSON object"):
-        load(path)
+    path = tmp_path / 'src/sql/units/broken'
+    path.mkdir(parents=True)
+    with pytest.raises(FileNotFoundError):
+        load(tmp_path)
 
 
-@pytest.mark.parametrize("field", ["job", "outputs", "owns", "depends_on"])
+@pytest.mark.parametrize("field", ["job", "legacy_unit", "outputs", "owns", "depends_on"])
 def test_missing_key(field):
     entry = spec()
     del entry[field]
