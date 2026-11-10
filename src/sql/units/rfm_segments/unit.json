@@ -1,0 +1,14 @@
+{
+  "job": "rfm_segments",
+  "legacy_unit": "rfm_segments",
+  "outputs": [
+    "gold.rfm_segments",
+    "gold.report_rfm_segments"
+  ],
+  "owns": [],
+  "depends_on": [
+    "silver_customers",
+    "silver_order_items",
+    "silver_orders"
+  ]
+}
