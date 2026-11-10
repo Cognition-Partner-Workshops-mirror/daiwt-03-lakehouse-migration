@@ -1,0 +1,36 @@
+resources:
+  jobs:
+    geo_rollup:
+      name: ${var.job_name_prefix}geo_rollup
+      parameters:
+        - name: drop
+          default: D0
+      tags:
+        environment: ${bundle.target}
+      tasks:
+        - task_key: build_geo_rollup
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ./etl.sql
+              source: WORKSPACE
+            parameters:
+              catalog: ${var.catalog}
+              bronze_schema: ${var.bronze_schema}
+              silver_schema: ${var.silver_schema}
+              gold_schema: ${var.gold_schema}
+              drop: "{{job.parameters.drop}}"
+        - task_key: publish_report
+          depends_on:
+            - task_key: build_geo_rollup
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ./report.sql
+              source: WORKSPACE
+            parameters:
+              catalog: ${var.catalog}
+              bronze_schema: ${var.bronze_schema}
+              silver_schema: ${var.silver_schema}
+              gold_schema: ${var.gold_schema}
+              drop: "{{job.parameters.drop}}"

@@ -1,0 +1,14 @@
+{
+  "job": "geo_rollup",
+  "legacy_unit": "geo_rollup",
+  "outputs": [
+    "gold.geo_rollup",
+    "gold.report_geo_rollup"
+  ],
+  "owns": [],
+  "depends_on": [
+    "silver_order_items",
+    "silver_orders",
+    "silver_stores"
+  ]
+}
