@@ -51,7 +51,12 @@ def output_entries(manifest, drop):
         parts = path.split("/")
         if ".." in parts:
             raise ValueError("Golden path must be under outputs/")
-        path_drop = parts[1] if len(parts) > 2 and parts[1] in drops else None
+        path_drop = parts[1] if len(parts) > 2 else None
+        for label in (path_drop, entry.get("drop")):
+            if label is not None and label not in drops:
+                raise ValueError(f"undeclared golden output drop: {label}")
+        if path_drop is not None and entry.get("drop", path_drop) != path_drop:
+            raise ValueError(f"golden output drop mismatch: {path_drop} vs {entry['drop']}")
         if entry.get("drop", path_drop or drop) != drop:
             continue
         columns = [column["name"] if isinstance(column, dict) else column for column in entry["columns"]]

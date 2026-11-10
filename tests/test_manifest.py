@@ -71,6 +71,32 @@ def test_flat_and_legacy_entries():
         output_entries({}, "D0")
 
 
+@pytest.mark.parametrize("entry", [
+    {"path": "outputs/undeclared/mart.sales.csv"},
+    {"path": "outputs/mart.sales.csv", "drop": "undeclared"},
+    {"path": "outputs/D0/mart.sales.csv", "drop": "undeclared"},
+])
+def test_undeclared_drop_fails_parity(monkeypatch, tmp_path, entry):
+    import databricks.sdk
+    import sys
+    from parity.parity_check import main
+    manifest = {"drops": ["D0"], "files": [{**entry, "columns": ["id"]}]}
+    monkeypatch.setattr(databricks.sdk, "WorkspaceClient", lambda **_: client(manifest))
+    output = tmp_path / "parity.json"
+    monkeypatch.setattr(sys, "argv", ["parity_check", "--suffix", "pr_3", "--drop", "D0",
+                                    "--output", str(output)])
+    assert main() == 1
+    result = json.loads(output.read_text())
+    assert result["status"] == "FAIL"
+    assert result["error"] == "undeclared golden output drop: undeclared"
+
+
+def test_conflicting_output_drop():
+    with pytest.raises(ValueError, match="drop mismatch"):
+        output_entries({"drops": ["D0", "next"], "files": [
+            {"path": "outputs/D0/mart.sales.csv", "drop": "next", "columns": ["id"]}]}, "D0")
+
+
 def test_empty_attestation_and_current_drop_set():
     row = {"head_sha": "head", "suffix": "pr_1", "status": "PASS", "units": "[]",
            "drops": '{"D0": {"status": "PASS"}}', "attestation_md": "# PASS"}
