@@ -273,6 +273,17 @@ resources:
           job_id: ${resources.jobs.finance_export.id}
           job_parameters:
             drop: '{{job.parameters.drop}}'
+      - task_key: orchestration
+        depends_on:
+        - task_key: customer_ltv
+        - task_key: daily_revenue
+        - task_key: returns_rate
+        - task_key: shipping_sla
+        - task_key: verify_silver
+        run_job_task:
+          job_id: ${resources.jobs.orchestration.id}
+          job_parameters:
+            drop: '{{job.parameters.drop}}'
       - task_key: store_weekly
         depends_on:
         - task_key: silver_order_items
@@ -566,6 +577,21 @@ resources:
             drop: '{{job.parameters.drop}}'
             mode: publish
             unit: finance_export
+      - task_key: publish_orchestration
+        depends_on:
+        - task_key: orchestration
+        notebook_task:
+          notebook_path: ../src/modernization/gate_task.py
+          base_parameters:
+            bundle_root: ${workspace.file_path}
+            catalog: ${var.catalog}
+            bronze_schema: ${var.bronze_schema}
+            silver_schema: ${var.silver_schema}
+            gold_schema: ${var.gold_schema}
+            warehouse_id: ${var.warehouse_id}
+            drop: '{{job.parameters.drop}}'
+            mode: publish
+            unit: orchestration
       - task_key: publish_store_weekly
         depends_on:
         - task_key: store_weekly
@@ -615,6 +641,7 @@ resources:
         - task_key: sql_macros
         - task_key: customer_ltv
         - task_key: finance_export
+        - task_key: orchestration
         - task_key: store_weekly
         - task_key: verify_silver
         - task_key: publish_attribution
@@ -634,6 +661,7 @@ resources:
         - task_key: publish_sessionization
         - task_key: publish_customer_ltv
         - task_key: publish_finance_export
+        - task_key: publish_orchestration
         - task_key: publish_store_weekly
         run_job_task:
           job_id: ${resources.jobs.governance.id}
