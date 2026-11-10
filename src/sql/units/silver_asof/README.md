@@ -82,8 +82,10 @@ load time.
 The self-check validates scalar edge cases and compares all ten function row
 counts against the independently resolved global bronze drop. Unity Catalog
 `information_schema.columns` and `routine_columns` verify ordered business-column
-names **and types**, including when results are empty. Any mismatch raises an
-error.
+names **and types**, including when results are empty. Function metadata may
+spell default strings as `string collate UTF8_BINARY`; the comparison normalizes
+only that equivalent default suffix, retaining other collations. Any mismatch
+raises an error.
 
 Warehouse proof uses `6dc4b80538621b7b` and isolated bronze/silver proof schemas
 in `daiwt_03_mig_dev`. It reads the golden D0 volume read-only, synthesizes D1/D10

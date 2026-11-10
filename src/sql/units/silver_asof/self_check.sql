@@ -107,14 +107,16 @@ WITH seq_cases(d, expected) AS (
   WHERE _drop = (SELECT resolved_drop FROM effective)
 ), bronze_columns AS (
   SELECT table_name,
-         transform(sort_array(collect_list(struct(ordinal_position, column_name, lower(full_data_type) AS kind))),
+         transform(sort_array(collect_list(struct(ordinal_position, column_name,
+                   regexp_replace(lower(full_data_type), ' collate utf8_binary$', '') AS kind))),
                    column -> named_struct('name', column.column_name, 'kind', column.kind)) AS business_columns
   FROM IDENTIFIER(:catalog || '.information_schema.columns')
   WHERE table_schema = :bronze_schema AND column_name NOT IN ('_drop', '_loaded_at')
   GROUP BY table_name
 ), function_columns AS (
   SELECT routines.routine_name,
-         transform(sort_array(collect_list(struct(cols.ordinal_position, cols.column_name, lower(cols.full_data_type) AS kind))),
+         transform(sort_array(collect_list(struct(cols.ordinal_position, cols.column_name,
+                   regexp_replace(lower(cols.full_data_type), ' collate utf8_binary$', '') AS kind))),
                    column -> named_struct('name', column.column_name, 'kind', column.kind)) AS business_columns
   FROM IDENTIFIER(:catalog || '.information_schema.routine_columns') AS cols
   JOIN IDENTIFIER(:catalog || '.information_schema.routines') AS routines

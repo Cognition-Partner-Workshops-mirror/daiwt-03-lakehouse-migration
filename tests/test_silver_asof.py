@@ -129,6 +129,16 @@ def test_self_check_counts_types_column_order_and_scalar_cases():
     assert CHECK.count('WHERE _drop = (SELECT resolved_drop FROM effective)') == len(TABLES)
 
 
+@pytest.mark.parametrize('metadata,expected', [
+    ('string', 'string'), ('string collate UTF8_BINARY', 'string'),
+    ('decimal(12,2)', 'decimal(12,2)'),
+    ('string collate UTF8_LCASE', 'string collate utf8_lcase'),
+])
+def test_schema_comparison_normalizes_only_default_string_collation(metadata, expected):
+    assert re.sub(r' collate utf8_binary$', '', metadata.lower()) == expected
+    assert CHECK.count("' collate utf8_binary$', ''") == 2
+
+
 def test_job_shape_and_parameters():
     jobs = yaml.safe_load((UNIT / 'silver_asof.job.yml').read_text())['resources']['jobs']
     assert set(jobs) == {'silver_asof'}
