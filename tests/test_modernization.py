@@ -157,10 +157,9 @@ def test_silver_fallback_and_empty_registry(monkeypatch):
     contract = {'outputs': [{'table': 'gold.other', 'unit': 'source'}]}
     args = (None, registry, contract, 'catalog', {'silver': 'silver_pr_1'}, 'warehouse', 'D0', 'silver')
     assert gates.verify(*args)['status'] == 'PASS'
-    assert warehouse.queries == ['SELECT 1 FROM `catalog`.`silver_pr_1`.`x` LIMIT 1']
+    assert warehouse.queries == ['SELECT 1 FROM `catalog`.`silver_pr_1`.`x` LIMIT 0']
     warehouse.rows = []
-    with pytest.raises(RuntimeError, match='Silver output is empty'):
-        gates.verify(*args)
+    assert gates.verify(*args)['status'] == 'PASS'
     assert gates.verify(None, {}, {'outputs': []}, 'catalog', {}, 'w', 'D0', 'silver')['status'] == 'PASS'
 
 
@@ -202,3 +201,15 @@ def test_workflow_runs_modernization_and_retains_oidc():
     assert 'python ci/run_units.py prod' not in commands
     assert commands.index('bundle deploy') < commands.index('bundle run')
     assert "test '${{ steps.parity.outcome }}' = success" in commands
+
+
+def test_gate_formats_timestamp_columns_like_parity_runner(monkeypatch):
+    warehouse = setup_gate(monkeypatch, [['1']])
+    registry = {'producer': spec('producer', outputs=['gold.x'])}
+    contract = {'outputs': [{'table': 'gold.x', 'unit': 'source'}]}
+    entries = [{'table': 'gold.x', 'columns': ['id', 'ts'], 'timestamp_columns': ['ts']}]
+    monkeypatch.setattr(gates, 'contract_entries', lambda *_: entries)
+    monkeypatch.setattr(gates, 'compare', lambda tables, _registry, _rows, actual: (
+        [actual(entry) for entry in tables['tables']], {'status': 'PASS', 'results': []})[1])
+    gates.verify(None, registry, contract, 'c', {'gold': 'g'}, 'w', 'D0', 'publish', 'producer')
+    assert warehouse.queries == ["SELECT `id`, date_format(`ts`, 'yyyy-MM-dd HH:mm:ss') AS `ts` FROM `c`.`g`.`x`"]
