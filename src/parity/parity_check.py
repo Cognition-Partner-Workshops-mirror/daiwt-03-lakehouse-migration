@@ -92,7 +92,9 @@ def contract_entries(contract, manifest, drop):
             raise ValueError(f"contract/manifest sha256 mismatch: {entry['path']}")
     if drop not in manifest_drops(manifest):
         raise ValueError("unknown drop")
-    return [{**entry, "columns": [c["name"] if isinstance(c, dict) else c for c in entry["columns"]]}
+    return [{**entry, "columns": [c["name"] if isinstance(c, dict) else c for c in entry["columns"]],
+             "timestamp_columns": [c["name"] for c in entry["columns"]
+                                   if isinstance(c, dict) and c.get("redshift_type") == "timestamp"]}
             for entry in outputs if entry["drop"] == drop]
 
 
@@ -213,7 +215,9 @@ def run(client, catalog, suffix, warehouse_id, registry, drop="D0", *, contract=
         if layer not in ("bronze", "silver", "gold"):
             raise ValueError("Unsupported output layer")
         schema = layer if catalog.endswith("_prod") else f"{layer}_{suffix}"
-        columns = ", ".join(identifier(c) for c in entry["columns"])
+        columns = ", ".join(
+            f"date_format({identifier(c)}, 'yyyy-MM-dd HH:mm:ss') AS {identifier(c)}"
+            if c in entry["timestamp_columns"] else identifier(c) for c in entry["columns"])
         return warehouse.sql(f"SELECT {columns} FROM {identifier(catalog)}.{identifier(schema)}.{identifier(table)}")
 
     contract = contract if contract is not None else json.loads((ROOT / "src/parity/contract.json").read_text())
