@@ -1,7 +1,7 @@
 import csv
 import json
 import sys
-from decimal import Decimal, ROUND_FLOOR, localcontext
+from decimal import Decimal, ROUND_DOWN, localcontext
 from pathlib import Path
 
 import pytest
@@ -19,7 +19,7 @@ def summary_values(daily, customers, returns, shipping):
         return sum(values, Decimal(0)) if values else None
 
     def floor(value, scale):
-        return value.quantize(Decimal(1).scaleb(-scale), rounding=ROUND_FLOOR) if value is not None else None
+        return value.quantize(Decimal(1).scaleb(-scale), rounding=ROUND_DOWN) if value is not None else None
 
     with localcontext() as context:
         context.prec = 80
@@ -66,10 +66,10 @@ def test_contract_and_sql_references():
         assert 'daiwt_03' not in sql and 'current_date' not in sql.lower()
     assert "CAST('as_of_2025-12-31' AS VARCHAR(32))" in ETL
     assert "DATE '2025-12-31'" in ETL
-    assert 'CAST(FLOOR(ltv.avg_ltv, 2) AS DECIMAL(38,2))' in ETL
+    assert 'CASE WHEN ltv.avg_ltv < 0 THEN -FLOOR(-ltv.avg_ltv, 2) ELSE FLOOR(ltv.avg_ltv, 2) END' in ETL
     assert 'FLOOR(rr.return_ratio, 15) AS DECIMAL(29,15)' in ETL
     assert '* CAST(100 AS DECIMAL(3,0)) AS DECIMAL(38,15))' in ETL
-    assert 'CAST(FLOOR(sla.avg_hours_to_deliver, 4) AS DECIMAL(38,4))' in ETL
+    assert 'CASE WHEN sla.avg_hours_to_deliver < 0 THEN -FLOOR(-sla.avg_hours_to_deliver, 4) ELSE FLOOR(sla.avg_hours_to_deliver, 4) END' in ETL
     assert 'ORDER BY snapshot_label' in REPORT
     for column in outputs[0]['columns']:
         assert column['name'] in ETL and column['name'] in REPORT

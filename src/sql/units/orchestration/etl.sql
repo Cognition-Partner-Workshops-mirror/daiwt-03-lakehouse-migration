@@ -4,10 +4,10 @@ SELECT CAST('as_of_2025-12-31' AS VARCHAR(32)) AS snapshot_label,
        DATE '2025-12-31' AS as_of_date,
        CAST(dr.total_revenue AS DECIMAL(38,2)) AS total_revenue,
        dr.total_orders,
-       CAST(FLOOR(ltv.avg_ltv, 2) AS DECIMAL(38,2)) AS avg_customer_ltv,
+       CAST(CASE WHEN ltv.avg_ltv < 0 THEN -FLOOR(-ltv.avg_ltv, 2) ELSE FLOOR(ltv.avg_ltv, 2) END AS DECIMAL(38,2)) AS avg_customer_ltv,
        CAST(CAST(FLOOR(rr.return_ratio, 15) AS DECIMAL(29,15))
             * CAST(100 AS DECIMAL(3,0)) AS DECIMAL(38,15)) AS overall_return_pct,
-       CAST(FLOOR(sla.avg_hours_to_deliver, 4) AS DECIMAL(38,4)) AS avg_ship_hours
+       CAST(CASE WHEN sla.avg_hours_to_deliver < 0 THEN -FLOOR(-sla.avg_hours_to_deliver, 4) ELSE FLOOR(sla.avg_hours_to_deliver, 4) END AS DECIMAL(38,4)) AS avg_ship_hours
 FROM (
     SELECT SUM(revenue) AS total_revenue, SUM(order_count) AS total_orders
     FROM IDENTIFIER(:catalog || '.' || :gold_schema || '.daily_revenue')
