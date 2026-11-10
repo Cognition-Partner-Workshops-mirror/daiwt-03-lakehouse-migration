@@ -1,0 +1,7 @@
+{
+  "job": "churn_flags",
+  "legacy_unit": "churn_flags",
+  "outputs": ["gold.churn_flags", "gold.report_churn_flags"],
+  "owns": [],
+  "depends_on": ["silver_customers", "silver_orders"]
+}
