@@ -1,0 +1,12 @@
+{
+  "job": "cohort_retention",
+  "legacy_unit": "cohort_retention",
+  "outputs": [
+    "gold.cohort_retention",
+    "gold.report_cohort_retention"
+  ],
+  "owns": [],
+  "depends_on": [
+    "silver_orders"
+  ]
+}
