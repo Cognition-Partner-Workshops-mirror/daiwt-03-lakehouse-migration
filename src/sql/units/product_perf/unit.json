@@ -1,0 +1,12 @@
+{
+  "job": "product_perf",
+  "legacy_unit": "product_perf",
+  "outputs": [
+    "gold.product_perf",
+    "gold.report_product_perf"
+  ],
+  "owns": [],
+  "depends_on": [
+    "silver_asof"
+  ]
+}
