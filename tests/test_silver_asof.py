@@ -10,7 +10,14 @@ from registry import load, validate
 
 ROOT = Path(__file__).resolve().parents[1]
 UNIT = ROOT / 'src/sql/units/silver_asof'
-SQL = (UNIT / 'functions.sql').read_text()
+RAW_SQL = (UNIT / 'functions.sql').read_text()
+
+
+def qualified_schema(param):
+    return "('`' || replace(:catalog, '`', '``') || '`.`' || replace(:" + param + ", '`', '``') || '`')"
+
+
+SQL = RAW_SQL.replace(qualified_schema('silver_schema'), 'silver').replace(qualified_schema('bronze_schema'), 'bronze')
 CHECK = (UNIT / 'self_check.sql').read_text()
 BRONZE = (ROOT / 'src/sql/units/bronze_landing/load.sql').read_text()
 TABLES = dict(re.findall(
@@ -88,9 +95,11 @@ def test_unit_registry_and_dependency_expansion():
 @pytest.mark.parametrize('table', TABLES)
 def test_function_business_schema_and_fully_qualified_snapshot_body(table):
     columns = business_columns(TABLES[table])
-    body = re.search(r"\.\`asof_" + table + r"\`\(as_of_drop STRING\)(.*?)FROM ' \|\| bronze \|\| '\.\`" + table + r"\`\n       WHERE _drop = ' \|\| silver \|\| '\.\`resolve_drop\`\(as_of_drop\)'", SQL, re.S).group(1)
+    body = re.search(r"\.\`asof_" + table + r"\`\(as_of_drop STRING\)(.*?);", SQL, re.S).group(1)
     assert 'RETURNS TABLE (' + ', '.join(columns) + ')' in body
     assert 'SELECT ' + ', '.join(column.split()[0] for column in columns) in body
+    assert "FROM ' || bronze || '.`" + table + '`' in body
+    assert "WHERE _drop = ' || silver || '.`resolve_drop`(as_of_drop)'" in body
 
 
 def test_one_global_resolver_includes_every_bronze_table():
@@ -108,9 +117,20 @@ def test_one_global_resolver_includes_every_bronze_table():
 def test_dynamic_ddl_is_escaped_and_only_creates_functions():
     assert SQL.count('EXECUTE IMMEDIATE') == len(TABLES) + 1
     for param in ('catalog', 'silver_schema', 'bronze_schema'):
-        assert "replace(:" + param + ", '`', '``')" in SQL
+        assert "replace(:" + param + ", '`', '``')" in RAW_SQL
+    assert qualified_schema('silver_schema') in RAW_SQL
+    assert qualified_schema('bronze_schema') in RAW_SQL
     assert not re.search(r'\b(?:CREATE TABLE|DELETE|INSERT|UPDATE|MERGE|DROP TABLE)\b', SQL, re.I)
     assert not re.search(r'\bSELECT\s+\*', SQL, re.I)
+
+
+def test_job_sql_file_statements_need_no_scripting_block_or_session_variables():
+    statements = [statement.strip() for statement in RAW_SQL.split(';') if statement.strip()]
+    assert len(statements) == len(TABLES) + 2
+    assert statements[0].startswith('CREATE OR REPLACE FUNCTION IDENTIFIER(')
+    assert all(statement.startswith('EXECUTE IMMEDIATE') for statement in statements[1:])
+    assert not re.search(r'\b(?:BEGIN|END|DECLARE|SET VAR)\b', '\n'.join(statements[1:]), re.I)
+    assert not re.search(r'\|\| (?:silver|bronze) \|\|', RAW_SQL)
 
 
 def test_self_check_counts_types_column_order_and_scalar_cases():

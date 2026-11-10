@@ -45,10 +45,12 @@ all ten tables has no lineage marker; distinguishing that from an unloaded drop
 would require a separate load ledger. Call helpers only after the entire bronze
 load job succeeds, not during a partial or failed load.
 
-The DDL uses `EXECUTE IMMEDIATE` with backtick-escaped catalog/schema identifiers
+The DDL uses standalone `EXECUTE IMMEDIATE` statements with backtick-escaped catalog/schema identifiers
 to embed fully qualified bronze references at creation time. It does not depend
 on the caller's current catalog/schema or leave parameter markers in stored
-function bodies. Sequence values are projected before sorting because warehouse
+function bodies. Each semicolon-delimited statement is self-contained: SQL-file
+jobs split statements and cannot execute a `BEGIN`/`DECLARE` block spanning them.
+Sequence values are projected before sorting because warehouse
 SQL UDF calls directly in `ORDER BY` are not supported.
 
 ## Builder calls
