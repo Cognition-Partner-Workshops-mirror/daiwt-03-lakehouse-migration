@@ -60,12 +60,40 @@ def output_entries(manifest, drop):
         if entry.get("drop", path_drop or drop) != drop:
             continue
         columns = [column["name"] if isinstance(column, dict) else column for column in entry["columns"]]
-        table = entry.get("table") or ".".join(parts[2:] if path_drop else parts[1:]).removesuffix(".csv")
-        outputs.append({**entry, "table": table, "columns": columns})
+        outputs.append({**entry, "columns": columns})
     return outputs
 
 
-def compare(manifest, registry, read_golden, read_actual):
+def contract_entries(contract, manifest, drop):
+    captured = [entry for name in manifest_drops(manifest) for entry in output_entries(manifest, name)]
+    outputs = contract["outputs"]
+    paths = [entry["path"] for entry in outputs]
+    targets = [entry["table"] for entry in outputs]
+    if len(paths) != len(set(paths)) or len(targets) != len(set(targets)):
+        raise ValueError("duplicate contract output path or target table")
+    remote = {entry["path"]: entry for entry in captured}
+    if len(remote) != len(captured):
+        raise ValueError("duplicate manifest output path")
+    if set(paths) != set(remote):
+        raise ValueError(f"contract/manifest output paths disagree: "
+                         f"missing={sorted(set(paths) - set(remote))}, extra={sorted(set(remote) - set(paths))}")
+    for entry in outputs:
+        if entry["drop"] not in manifest_drops(manifest):
+            raise ValueError(f"undeclared contract drop: {entry['drop']}")
+        if entry["path"].split("/") != ["outputs", entry["drop"], entry["unit"],
+                                        entry["path"].split("/")[-1]]:
+            raise ValueError(f"contract unit/drop differs from path: {entry['path']}")
+        if not re.fullmatch(r"(silver|gold)\.[a-z][a-z0-9_]*", entry["table"]):
+            raise ValueError(f"invalid contract target: {entry['table']}")
+        if entry["sha256"] != remote[entry["path"]]["sha256"]:
+            raise ValueError(f"contract/manifest sha256 mismatch: {entry['path']}")
+    if drop not in manifest_drops(manifest):
+        raise ValueError("unknown drop")
+    return [{**entry, "columns": [c["name"] if isinstance(c, dict) else c for c in entry["columns"]]}
+            for entry in outputs if entry["drop"] == drop]
+
+
+def compare(manifest, registry, read_golden, read_actual, ran_units=None):
     tables = manifest["tables"]
     if not isinstance(tables, list):
         raise ValueError("manifest.tables must be a list")
@@ -82,9 +110,13 @@ def compare(manifest, registry, read_golden, read_actual):
         if table in seen:
             raise ValueError(f"Duplicate golden: {table}")
         seen.add(table)
-        unit = producers.get(table)
-        if unit is None:
+        unit = entry["unit"]
+        if unit not in registry:
             results.append({"table": table, "status": "SKIP", "reason": "not yet migrated"})
+            continue
+        if ran_units is not None and unit not in ran_units:
+            results.append({"table": table, "unit": unit, "status": "SKIP",
+                            "reason": "not run in this verification"})
             continue
         try:
             golden = read_golden(entry)
@@ -163,7 +195,7 @@ class GoldenStore:
         return rows
 
 
-def run(client, catalog, suffix, warehouse_id, registry, drop="D0"):
+def run(client, catalog, suffix, warehouse_id, registry, drop="D0", *, contract=None, ran_units=None):
     if catalog not in ("daiwt_03_mig_dev", "daiwt_03_mig_prod"):
         raise ValueError("Unsupported catalog")
     identifier(suffix)
@@ -178,7 +210,10 @@ def run(client, catalog, suffix, warehouse_id, registry, drop="D0"):
         columns = ", ".join(identifier(c) for c in entry["columns"])
         return warehouse.sql(f"SELECT {columns} FROM {identifier(catalog)}.{identifier(schema)}.{identifier(table)}")
 
-    result = compare({"tables": output_entries(store.manifest(), drop)}, registry, store.rows, actual)
+    contract = contract if contract is not None else json.loads((ROOT / "src/parity/contract.json").read_text())
+    entries = contract_entries(contract, store.manifest(), drop)
+    result = compare({"tables": entries}, registry, store.rows, actual,
+                     ran_units if catalog.endswith("_dev") else None)
     for row in result["results"]:
         row["drop"] = drop
     counts = {status: sum(row["status"] == status for row in result["results"])
@@ -191,6 +226,7 @@ def main():
     parser.add_argument("--catalog", default="daiwt_03_mig_dev")
     parser.add_argument("--suffix", default="pr_1")
     parser.add_argument("--drop", default="D0")
+    parser.add_argument("--ran-units", type=Path)
     parser.add_argument("--warehouse-id", default="6dc4b80538621b7b")
     parser.add_argument("--profile")
     parser.add_argument("--output", default="out/parity.json")
@@ -202,7 +238,12 @@ def main():
         from databricks.sdk import WorkspaceClient
         client = WorkspaceClient(profile=args.profile)
         registry = json.loads((ROOT / "src/sql/units/registry.json").read_text())
-        result = run(client, args.catalog, args.suffix, args.warehouse_id, registry, args.drop)
+        ran_units = json.loads(args.ran_units.read_text()) if args.ran_units else None
+        if ran_units is not None and (not isinstance(ran_units, list)
+                                      or not all(isinstance(unit, str) for unit in ran_units)):
+            raise ValueError("ran units must be a list of unit names")
+        result = run(client, args.catalog, args.suffix, args.warehouse_id, registry, args.drop,
+                     ran_units=ran_units)
     except Exception as exc:
         result = {"status": "FAIL", "drop": args.drop, "goldens": 0, "results": [],
                   "counts": {"PASS": 0, "FAIL": 0, "SKIP": 0}, "compared": 0, "error": str(exc)}

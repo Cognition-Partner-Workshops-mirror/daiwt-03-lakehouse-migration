@@ -34,7 +34,7 @@ def test_invalid_drops(drops):
 def test_remote_missing_manifest():
     remote = client(error=NotFound("missing"))
     assert load_drops(remote) == ["D0"]
-    result = run(remote, "daiwt_03_mig_dev", "pr_1", "w", {}, "D0")
+    result = run(remote, "daiwt_03_mig_dev", "pr_1", "w", {}, "D0", contract={"outputs": []})
     assert result["status"] == "PASS" and result["goldens"] == 0
     assert render(result)[1]
 
@@ -47,14 +47,17 @@ def test_remote_denied():
 def test_capture_outputs_are_skipped():
     manifest = {"drops": [{"name": "D0"}, "next"], "files": [
         {"path": "inputs/core.orders.csv", "columns": ["id"]},
-        {"path": "outputs/D0/mart.sales.csv", "columns": [{"name": "id", "redshift_type": "bigint"}],
+        {"path": "outputs/D0/sales/sales.csv", "columns": [{"name": "id", "redshift_type": "bigint"}],
          "sha256": "hash", "row_count": 1, "keys": ["id"]},
-        {"path": "outputs/next/mart.sales.csv", "columns": ["id"]},
+        {"path": "outputs/next/next/sales.csv", "columns": ["id"], "sha256": "next"},
     ]}
     entries = output_entries(manifest, "D0")
     assert len(entries) == 1 and entries[0]["columns"] == ["id"]
-    assert entries[0]["table"] == "mart.sales"
-    result = run(client(manifest), "daiwt_03_mig_dev", "pr_1", "w", {}, "D0")
+    assert "table" not in entries[0]
+    contract = {"outputs": [
+        {**manifest["files"][1], "drop": "D0", "unit": "sales", "table": "gold.sales"},
+        {**manifest["files"][2], "drop": "next", "unit": "next", "table": "gold.next_sales"}]}
+    result = run(client(manifest), "daiwt_03_mig_dev", "pr_1", "w", {}, "D0", contract=contract)
     assert result["status"] == "PASS" and result["goldens"] == 1
     assert result["results"][0]["reason"] == "not yet migrated"
     assert render(result)[1]

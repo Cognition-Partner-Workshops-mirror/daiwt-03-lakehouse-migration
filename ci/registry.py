@@ -24,6 +24,16 @@ def topo_order(registry, units):
     return ordered
 
 
+def with_dependencies(registry, units):
+    selected = set(units)
+    topo_order(registry, selected)
+    while True:
+        upstream = {dependency for unit in selected for dependency in registry[unit].get("depends_on", [])}
+        if upstream <= selected:
+            return topo_order(registry, selected)
+        selected |= upstream
+
+
 def validate(registry, contract_outputs=None):
     if not isinstance(registry, dict):
         raise ValueError("registry must be a JSON object")

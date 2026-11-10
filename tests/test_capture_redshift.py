@@ -101,7 +101,7 @@ def test_manifest_parity_contract():
     manifest = capture.build_manifest({"engine": "Redshift"}, files, units, "2026-11-10T14:24:33Z")
     manifest = json.loads(json.dumps(manifest))
     assert manifest["tables"] == [{"table": "gold.test", "path": "outputs/D0/test/table.csv", "columns": ["id"]}]
-    result = compare(manifest, {}, None, None)
+    result = compare({"tables": [{**manifest["tables"][0], "unit": "test"}]}, {}, None, None)
     assert result["status"] == "PASS"
     assert [row["status"] for row in result["results"]] == ["SKIP"]
     assert manifest["drops"] == ["D0"]
