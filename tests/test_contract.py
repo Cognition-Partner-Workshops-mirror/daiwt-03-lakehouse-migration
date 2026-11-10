@@ -35,8 +35,7 @@ def test_all_outputs_have_unique_targets():
 
 
 def test_empty_registry_skips_every_output():
-    registry = json.loads((ROOT / "src/sql/units/registry.json").read_text())
-    assert registry == {}
+    registry = {}
     result = run(client(MANIFEST), "daiwt_03_mig_dev", "pr_1", "w", registry)
     assert result["status"] == "PASS"
     assert result["counts"] == {"PASS": 0, "FAIL": 0, "SKIP": 48}
@@ -45,20 +44,20 @@ def test_empty_registry_skips_every_output():
 
 @pytest.mark.parametrize("catalog", ["daiwt_03_mig_dev", "daiwt_03_mig_prod"])
 def test_unknown_registered_unit_rejected(catalog):
-    with pytest.raises(ValueError, match="registered units absent from parity contract: typo_unit"):
+    with pytest.raises(ValueError, match="legacy_unit not in contract"):
         run(client(MANIFEST), catalog, "pr_1", "w",
-            {"typo_unit": {"outputs": []}}, ran_units=[])
+            {"typo_unit": {"job": "typo", "legacy_unit": "typo_unit", "outputs": [], "owns": [], "depends_on": []}}, ran_units=[])
 
 
 def test_unknown_registered_unit_cli_fails(monkeypatch, tmp_path, capsys):
     import sys
     import databricks.sdk
     from parity import parity_check
-    for directory, content in [("src/sql/units", {"typo_unit": {"outputs": []}}),
+    for directory, content in [("src/sql/units/typo_unit", {"job": "typo", "legacy_unit": "typo_unit", "outputs": [], "owns": [], "depends_on": []}),
                                ("src/parity", CONTRACT)]:
         target = tmp_path / directory
         target.mkdir(parents=True)
-        filename = "registry.json" if directory.endswith("units") else "contract.json"
+        filename = "unit.json" if directory.endswith("typo_unit") else "contract.json"
         (target / filename).write_text(json.dumps(content))
     monkeypatch.setattr(parity_check, "ROOT", tmp_path)
     monkeypatch.setattr(databricks.sdk, "WorkspaceClient", lambda **_: client(MANIFEST))
@@ -67,7 +66,7 @@ def test_unknown_registered_unit_cli_fails(monkeypatch, tmp_path, capsys):
     assert parity_check.main() == 1
     result = json.loads(output.read_text())
     assert result["status"] == "FAIL"
-    assert result["error"] == "registered units absent from parity contract: typo_unit"
+    assert result["error"] == "typo_unit: legacy_unit not in contract"
     assert result["error"] in capsys.readouterr().out
 
 
@@ -106,7 +105,7 @@ def test_registered_unit_compares_table_and_report(monkeypatch, catalog, schema)
     queries = []
     monkeypatch.setattr(GoldenStore, "rows", lambda *_: [["value"]])
     monkeypatch.setattr(Warehouse, "sql", lambda _, query: queries.append(query) or [["value"]])
-    registry = {"daily_revenue": {"outputs": ["gold.daily_revenue"]}}
+    registry = {"daily_revenue": daily_spec()}
     result = run(client(MANIFEST), catalog, "pr_1", "w", registry)
     assert result["status"] == "PASS"
     assert result["counts"] == {"PASS": 2, "FAIL": 0, "SKIP": 46}
@@ -116,13 +115,13 @@ def test_registered_unit_compares_table_and_report(monkeypatch, catalog, schema)
 
 
 @pytest.mark.parametrize("catalog,compared,reason", [
-    ("daiwt_03_mig_dev", 0, "not run in this verification"),
+    ("daiwt_03_mig_dev", 0, "not selected"),
     ("daiwt_03_mig_prod", 2, "matched")])
 def test_dev_scope_does_not_change_production(monkeypatch, catalog, compared, reason):
     monkeypatch.setattr(GoldenStore, "rows", lambda *_: [])
     monkeypatch.setattr(Warehouse, "sql", lambda *_: [])
     result = run(client(MANIFEST), catalog, "pr_1", "w",
-                 {"daily_revenue": {"outputs": []}}, ran_units=[])
+                 {"daily_revenue": daily_spec()}, ran_units=[])
     assert result["status"] == "PASS"
     assert result["compared"] == compared
     daily = [r for r in result["results"] if r["table"] in
@@ -134,7 +133,7 @@ def test_registered_read_failure_is_not_skipped():
     entries = contract_entries(CONTRACT, MANIFEST, "D0")
     def broken(_):
         raise RuntimeError("missing target")
-    result = compare({"tables": entries}, {"daily_revenue": {"outputs": []}},
+    result = compare({"tables": entries}, {"daily_revenue": daily_spec()},
                      lambda _: [], broken)
     assert result["status"] == "FAIL"
     assert sum(r["status"] == "FAIL" for r in result["results"]) == 2
@@ -154,3 +153,8 @@ def test_generator_mapping_and_validation():
     units["foundation"]["outputs"][0]["table"] = "gold.wrong"
     with pytest.raises(ValueError, match="target table mismatch"):
         build(MANIFEST, units)
+
+
+def daily_spec():
+    return dict(job='daily', legacy_unit='daily_revenue',
+                outputs=['gold.daily_revenue', 'gold.report_daily_revenue'], owns=[], depends_on=[])
