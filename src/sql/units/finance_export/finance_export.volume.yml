@@ -1,9 +1,0 @@
-targets:
-  dev:
-    resources:
-      volumes:
-        finance_export:
-          catalog_name: ${var.catalog}
-          schema_name: ${resources.schemas.gold.name}
-          name: finance_export
-          comment: daiwt-03-migration finance_export dev export

@@ -1,1 +1,0 @@
-{"job": "orchestration", "legacy_unit": "orchestration", "outputs": ["gold.exec_summary", "gold.report_orchestration"], "owns": [], "depends_on": ["daily_revenue", "customer_ltv", "returns_rate", "shipping_sla"]}

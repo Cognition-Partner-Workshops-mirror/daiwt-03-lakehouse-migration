@@ -2,7 +2,7 @@
 
 Source estate: `Cognition-Partner-Workshops-mirror/daiwt-03-redshift` @ `1bee48a` (paths below are relative to that repo).
 Target contract: `Cognition-Partner-Workshops-mirror/daiwt-03-lakehouse-migration` `main` @ `80095cd` (`src/parity/contract.json`).
-Machine-readable companion: `units.json` (one entry per unit in `.migration/units.yaml`, names verbatim).
+The current machine-readable plan is regenerated at `docs/units.yml` during discovery.
 
 ## 1. Estate layout
 
