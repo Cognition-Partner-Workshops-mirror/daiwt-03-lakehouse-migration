@@ -1,0 +1,7 @@
+{
+  "job": "customer_ltv",
+  "legacy_unit": "customer_ltv",
+  "outputs": ["gold.customer_ltv", "gold.report_customer_ltv"],
+  "owns": [],
+  "depends_on": ["silver_customers", "silver_order_items", "silver_orders", "sql_macros"]
+}
