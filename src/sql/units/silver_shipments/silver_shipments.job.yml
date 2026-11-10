@@ -1,0 +1,21 @@
+resources:
+  jobs:
+    silver_shipments:
+      name: ${var.job_name_prefix}silver_shipments
+      parameters:
+        - name: drop
+          default: D0
+      tags:
+        environment: ${bundle.target}
+      tasks:
+        - task_key: self_check
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ./self_check.sql
+              source: WORKSPACE
+            parameters:
+              catalog: ${var.catalog}
+              silver_schema: ${var.silver_schema}
+              drop: "{{job.parameters.drop}}"
+              silver_bad_rows: ${var.silver_bad_rows}
