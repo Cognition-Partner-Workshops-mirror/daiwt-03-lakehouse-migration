@@ -1,0 +1,12 @@
+name: rfm_segments
+layer: gold
+sql:
+  - etl.sql
+  - report.sql
+outputs:
+  - table: gold.rfm_segments
+    golden: outputs/D0/rfm_segments/rfm_segments.csv
+    keys: [customer_id]
+  - table: gold.report_rfm_segments
+    golden: outputs/D0/rfm_segments/report.csv
+    keys: [rfm_segment]
