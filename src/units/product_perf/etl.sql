@@ -27,7 +27,7 @@ top_stores AS (
                ), ','
            ) AS codes
     FROM ranked
-    WHERE rn <= 3 AND region IS NOT NULL AND rtrim(region) <> ''
+    WHERE rn <= 3 AND region IS NOT NULL
     GROUP BY product_id
 ),
 agg AS (
