@@ -1,0 +1,12 @@
+name: returns_rate
+layer: gold
+sql:
+  - etl.sql
+  - report.sql
+outputs:
+  - table: gold.returns_rate
+    golden: outputs/D0/returns_rate/returns_rate.csv
+    keys: [category]
+  - table: gold.returns_rate_report
+    golden: outputs/D0/returns_rate/report.csv
+    keys: [category]
