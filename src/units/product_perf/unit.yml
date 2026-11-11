@@ -1,0 +1,12 @@
+name: product_perf
+layer: gold
+sql:
+  - 01_product_perf.sql
+  - 02_report.sql
+outputs:
+  - table: gold.product_perf
+    golden: outputs/D0/product_perf/product_perf.csv
+    keys: [product_id]
+  - table: gold.report_product_perf
+    golden: outputs/D0/product_perf/report.csv
+    keys: [category]
