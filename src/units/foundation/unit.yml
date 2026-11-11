@@ -1,0 +1,35 @@
+name: foundation
+layer: silver
+sql:
+  - 01_core_tables.sql
+outputs:
+  - table: silver.customers
+    golden: outputs/D0/foundation/customers.csv
+    keys: [customer_id]
+  - table: silver.stores
+    golden: outputs/D0/foundation/stores.csv
+    keys: [store_id]
+  - table: silver.products
+    golden: outputs/D0/foundation/products.csv
+    keys: [product_id]
+  - table: silver.orders
+    golden: outputs/D0/foundation/orders.csv
+    keys: [order_id]
+  - table: silver.order_items
+    golden: outputs/D0/foundation/order_items.csv
+    keys: [order_item_id]
+  - table: silver.payments
+    golden: outputs/D0/foundation/payments.csv
+    keys: [payment_id]
+  - table: silver.returns
+    golden: outputs/D0/foundation/returns.csv
+    keys: [return_id]
+  - table: silver.shipments
+    golden: outputs/D0/foundation/shipments.csv
+    keys: [shipment_id]
+  - table: silver.web_events
+    golden: outputs/D0/foundation/web_events.csv
+    keys: [event_id]
+  - table: silver.campaign_touches
+    golden: outputs/D0/foundation/campaign_touches.csv
+    keys: [touch_id]
