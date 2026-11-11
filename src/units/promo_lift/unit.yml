@@ -1,0 +1,12 @@
+name: promo_lift
+layer: gold
+sql:
+  - etl.sql
+  - report.sql
+outputs:
+  - table: gold.promo_lift
+    golden: outputs/D0/promo_lift/promo_lift.csv
+    keys: [sales_channel]
+  - table: gold.promo_lift_report
+    golden: outputs/D0/promo_lift/report.csv
+    keys: [sales_channel]
