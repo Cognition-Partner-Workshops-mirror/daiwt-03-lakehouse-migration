@@ -1,0 +1,12 @@
+name: daily_revenue
+layer: gold
+sql:
+  - etl.sql
+  - report.sql
+outputs:
+  - table: gold.daily_revenue
+    golden: outputs/D0/daily_revenue/daily_revenue.csv
+    keys: [order_date, sales_channel]
+  - table: gold.report_daily_revenue
+    golden: outputs/D0/daily_revenue/report.csv
+    keys: [order_month, sales_channel]

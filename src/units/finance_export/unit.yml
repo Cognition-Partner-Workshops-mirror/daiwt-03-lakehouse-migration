@@ -1,0 +1,12 @@
+name: finance_export
+layer: gold
+sql:
+  - etl.sql
+  - report.sql
+outputs:
+  - table: gold.finance_monthly
+    golden: outputs/D0/finance_export/finance_monthly.csv
+    keys: [month]
+  - table: gold.report_finance_export
+    golden: outputs/D0/finance_export/report.csv
+    keys: [fiscal_year, fiscal_qtr]

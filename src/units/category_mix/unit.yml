@@ -1,0 +1,12 @@
+name: category_mix
+layer: gold
+sql:
+  - etl.sql
+  - report.sql
+outputs:
+  - table: gold.category_mix
+    golden: outputs/D0/category_mix/category_mix.csv
+    keys: [category]
+  - table: gold.report_category_mix
+    golden: outputs/D0/category_mix/report.csv
+    keys: [category]
