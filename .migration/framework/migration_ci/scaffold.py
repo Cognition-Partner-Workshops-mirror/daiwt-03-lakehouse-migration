@@ -87,6 +87,7 @@ def sync(target):
     if source == destination / 'migration_ci':
         raise ValueError('Run sync from the new framework distribution, not the destination copy')
     destination.mkdir(parents=True, exist_ok=True)
+    (destination / '.gitignore').write_text('/build/\n*.egg-info/\n')
     if (destination / 'migration_ci').exists():
         shutil.rmtree(destination / 'migration_ci')
     shutil.copytree(source, destination / 'migration_ci', ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
