@@ -1,0 +1,7 @@
+name: silver_web_events
+layer: silver
+sql: [web_events.sql]
+outputs:
+  - table: silver.web_events
+    golden: outputs/D0/foundation/web_events.csv
+    keys: [event_id]
