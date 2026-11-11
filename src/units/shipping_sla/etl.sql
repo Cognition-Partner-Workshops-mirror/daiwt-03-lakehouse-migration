@@ -10,7 +10,8 @@ SELECT CAST(carrier AS STRING) AS carrier,
        CAST(COUNT(*) AS BIGINT) AS shipments,
        CAST(COUNT(delivered_ts) AS BIGINT) AS delivered,
        CAST(COUNT(*) - COUNT(delivered_ts) AS BIGINT) AS in_flight,
-       CAST(CAST(AVG(delivery_hours) AS BIGINT) AS DECIMAL(10,2)) AS avg_hours_to_deliver,
+       CAST(CAST(SIGN(AVG(delivery_hours)) * FLOOR(ABS(AVG(delivery_hours))) AS BIGINT)
+         AS DECIMAL(10,2)) AS avg_hours_to_deliver,
        CAST(MAX(delivery_hours) AS BIGINT) AS max_hours_to_deliver,
        CAST(SUM(CASE WHEN delivery_hours <= 96 THEN 1 ELSE 0 END) AS BIGINT) AS on_time_96h,
        CAST(MIN(hour(convert_timezone('UTC', 'America/Los_Angeles', delivered_ts))) AS INT)
