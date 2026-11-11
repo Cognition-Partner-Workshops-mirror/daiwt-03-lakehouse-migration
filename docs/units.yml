@@ -1,0 +1,609 @@
+# Golden paths are relative to estate.yml golden_path. D0 only.
+estate: daiwt_03
+source_dialect: redshift
+drops:
+- D0
+units:
+- name: foundation
+  layer: silver
+  legacy_sources:
+  - legacy/redshift/00_foundation/01_schemas.sql
+  - legacy/redshift/00_foundation/02_core_tables.sql
+  - legacy/redshift/00_foundation/03_udfs.sql
+  outputs:
+  - table: silver.customers
+    golden: outputs/D0/foundation/customers.csv
+    keys:
+    - customer_id
+  - table: silver.stores
+    golden: outputs/D0/foundation/stores.csv
+    keys:
+    - store_id
+  - table: silver.products
+    golden: outputs/D0/foundation/products.csv
+    keys:
+    - product_id
+  - table: silver.orders
+    golden: outputs/D0/foundation/orders.csv
+    keys:
+    - order_id
+  - table: silver.order_items
+    golden: outputs/D0/foundation/order_items.csv
+    keys:
+    - order_item_id
+  - table: silver.payments
+    golden: outputs/D0/foundation/payments.csv
+    keys:
+    - payment_id
+  - table: silver.returns
+    golden: outputs/D0/foundation/returns.csv
+    keys:
+    - return_id
+  - table: silver.shipments
+    golden: outputs/D0/foundation/shipments.csv
+    keys:
+    - shipment_id
+  - table: silver.web_events
+    golden: outputs/D0/foundation/web_events.csv
+    keys:
+    - event_id
+  - table: silver.campaign_touches
+    golden: outputs/D0/foundation/campaign_touches.csv
+    keys:
+    - touch_id
+  depends_on: []
+  reads: []
+  dialect_notes:
+  - Keep all ten typed tables as one legacy load_core table group. Drop DISTKEY/SORTKEY/ENCODE. Preserve
+    CHAR(4) padding, DECIMAL(12,2), booleans, nullable fields and SUPER as JSON text; no cleansing. Bronze
+    inputs are inputs/D0/core.<entity>.csv; framework lands them. UDF expressions are consumed by customer_ltv
+    and finance_export.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: daily_revenue
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/daily_revenue/etl.sql
+  - legacy/redshift/units/daily_revenue/report.sql
+  outputs:
+  - table: gold.daily_revenue
+    golden: outputs/D0/daily_revenue/daily_revenue.csv
+    keys:
+    - order_date
+    - sales_channel
+  - table: gold.report_daily_revenue
+    golden: outputs/D0/daily_revenue/report.csv
+    keys:
+    - order_month
+    - sales_channel
+  depends_on:
+  - foundation
+  reads:
+  - silver.orders
+  - silver.order_items
+  dialect_notes:
+  - TRUNC(timestamp)::DATE; distinct orders and exact decimal line-net sums for every status. Report rolls
+    up month starts.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: customer_ltv
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/customer_ltv/etl.sql
+  - legacy/redshift/units/customer_ltv/report.sql
+  outputs:
+  - table: gold.customer_ltv
+    golden: outputs/D0/customer_ltv/customer_ltv.csv
+    keys:
+    - customer_id
+  - table: gold.report_customer_ltv
+    golden: outputs/D0/customer_ltv/report.csv
+    keys:
+    - region
+  depends_on:
+  - foundation
+  reads:
+  - silver.customers
+  - silver.orders
+  - silver.order_items
+  dialect_notes:
+  - Customer-led LEFT JOINs; NULL phone remains NULL, regex strips all non-digits; preserve padded region.
+    LTV defaults zero, AOV stays NULL without lines. AOV is AVG(net unit price), with numeric AVG truncated
+    to scale 2; report AVG(ltv) likewise.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: geo_rollup
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/geo_rollup/etl.sql
+  - legacy/redshift/units/geo_rollup/report.sql
+  outputs:
+  - table: gold.geo_rollup
+    golden: outputs/D0/geo_rollup/geo_rollup.csv
+    keys:
+    - grouping_id
+    - region
+    - state
+  - table: gold.report_geo_rollup
+    golden: outputs/D0/geo_rollup/report.csv
+    keys:
+    - grouping_id
+    - region
+    - state
+  depends_on:
+  - foundation
+  reads:
+  - silver.stores
+  - silver.orders
+  - silver.order_items
+  dialect_notes:
+  - Preserve explicit GROUPING CASE identifiers 1/2/3 and GROUPING SETS, padded region and NULL grouping
+    keys. Store-led LEFT JOINs; revenue coalesces zero. Match composite keys NULL-safely.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: churn_flags
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/churn_flags/etl.sql
+  - legacy/redshift/units/churn_flags/report.sql
+  outputs:
+  - table: gold.churn_flags
+    golden: outputs/D0/churn_flags/churn_flags.csv
+    keys:
+    - customer_id
+  - table: gold.report_churn_flags
+    golden: outputs/D0/churn_flags/report.csv
+    keys:
+    - churn_flag
+  depends_on:
+  - foundation
+  reads:
+  - silver.customers
+  - silver.orders
+  dialect_notes:
+  - Replace procedure/temp-table loop set-wise. MAX(order_ts)::DATE; anchor 2025-12-31; strict >180 and
+    >90; NULL last order means never_ordered. Report integer AVG truncates toward zero.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: product_perf
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/product_perf/etl.sql
+  - legacy/redshift/units/product_perf/report.sql
+  outputs:
+  - table: gold.product_perf
+    golden: outputs/D0/product_perf/product_perf.csv
+    keys:
+    - product_id
+  - table: gold.report_product_perf
+    golden: outputs/D0/product_perf/report.csv
+    keys:
+    - category
+  depends_on:
+  - foundation
+  reads:
+  - silver.products
+  - silver.order_items
+  - silver.orders
+  - silver.stores
+  dialect_notes:
+  - Rank top three regions (not individual stores) by units DESC, region ASC. LISTAGG in that order, trim
+    CHAR padding within concatenated codes only. Product-led LEFT JOINs, zero sums, NULL top_stores. Revenue
+    NUMERIC(18,2).
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: store_weekly
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/store_weekly/etl.sql
+  - legacy/redshift/units/store_weekly/report.sql
+  outputs:
+  - table: gold.store_weekly
+    golden: outputs/D0/store_weekly/store_weekly.csv
+    keys:
+    - store_id
+    - week_start
+  - table: gold.report_store_weekly
+    golden: outputs/D0/store_weekly/report.csv
+    keys:
+    - store_id
+  depends_on:
+  - foundation
+  reads:
+  - silver.orders
+  - silver.order_items
+  - silver.stores
+  dialect_notes:
+  - Monday week starts; end=start+6 days. DATEDIFF(week) counts Monday boundaries from 2025-01-01, not
+    elapsed seven-day periods. Report joins stores and preserves region padding; active week span includes
+    +1.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: category_mix
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/category_mix/etl.sql
+  - legacy/redshift/units/category_mix/report.sql
+  outputs:
+  - table: gold.category_mix
+    golden: outputs/D0/category_mix/category_mix.csv
+    keys:
+    - category
+  - table: gold.report_category_mix
+    golden: outputs/D0/category_mix/report.csv
+    keys:
+    - category
+  depends_on:
+  - foundation
+  reads:
+  - silver.products
+  - silver.order_items
+  dialect_notes:
+  - RATIO_TO_REPORT is float8; preserve exact decimal revenue and decimal quotient before DOUBLE conversion;
+    zero total gives NULL.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: basket_affinity
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/basket_affinity/etl.sql
+  - legacy/redshift/units/basket_affinity/report.sql
+  outputs:
+  - table: gold.basket_affinity
+    golden: outputs/D0/basket_affinity/basket_affinity.csv
+    keys:
+    - product_id_a
+    - product_id_b
+  - table: gold.report_basket_affinity
+    golden: outputs/D0/basket_affinity/report.csv
+    keys:
+    - product_id_a
+    - product_id_b
+  depends_on:
+  - foundation
+  reads:
+  - silver.order_items
+  - silver.products
+  dialect_notes:
+  - Same-order pairs with b.product_id>a.product_id; distinct order support >=5. Report product-name joins
+    and concatenation preserve NULL behavior; ORDER BY pair_orders DESC, ids ASC before LIMIT 50.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: sessionization
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/sessionization/etl.sql
+  - legacy/redshift/units/sessionization/report.sql
+  outputs:
+  - table: gold.web_sessions
+    golden: outputs/D0/sessionization/web_sessions.csv
+    keys:
+    - customer_id
+    - session_id
+  - table: gold.report_sessionization
+    golden: outputs/D0/sessionization/report.csv
+    keys:
+    - customer_id
+  depends_on:
+  - foundation
+  reads:
+  - silver.web_events
+  dialect_notes:
+  - Filter NULL customers; LAG ordered by event_ts,event_id; strict second-boundary gap >1800; running
+    SUM uses ROWS UNBOUNDED PRECEDING. Preserve NTZ endpoints. Report checkout_sessions sums checkout
+    events.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: shipping_sla
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/shipping_sla/etl.sql
+  - legacy/redshift/units/shipping_sla/report.sql
+  outputs:
+  - table: gold.shipping_sla
+    golden: outputs/D0/shipping_sla/shipping_sla.csv
+    keys:
+    - carrier
+  - table: gold.report_shipping_sla
+    golden: outputs/D0/shipping_sla/report.csv
+    keys:
+    - carrier
+  depends_on:
+  - foundation
+  reads:
+  - silver.shipments
+  dialect_notes:
+  - DATEDIFF(hour) counts crossed hour boundaries, including negatives. Integer AVG truncates before NUMERIC(10,2)
+    cast. NULL delivery excluded from COUNT/AVG, contributes zero to <=96 CASE. UTC to America/Los_Angeles
+    is DST-aware; MIN local delivery hour. Report omits local-hour column.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: rfm_segments
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/rfm_segments/etl.sql
+  - legacy/redshift/units/rfm_segments/report.sql
+  outputs:
+  - table: gold.rfm_segments
+    golden: outputs/D0/rfm_segments/rfm_segments.csv
+    keys:
+    - customer_id
+  - table: gold.report_rfm_segments
+    golden: outputs/D0/rfm_segments/report.csv
+    keys:
+    - rfm_segment
+  depends_on:
+  - foundation
+  reads:
+  - silver.customers
+  - silver.orders
+  - silver.order_items
+  dialect_notes:
+  - 'Anchor recency at 2025-12-31. Customer LEFT JOIN; NULL recency, zero frequency/monetary when no orders.
+    NTILE(5): recency ASC NULLS LAST; frequency/monetary DESC NULLS FIRST; customer_id tie-break. Report
+    integer AVG truncates.'
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: promo_lift
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/promo_lift/etl.sql
+  - legacy/redshift/units/promo_lift/report.sql
+  outputs:
+  - table: gold.promo_lift
+    golden: outputs/D0/promo_lift/promo_lift.csv
+    keys:
+    - sales_channel
+  - table: gold.report_promo_lift
+    golden: outputs/D0/promo_lift/report.csv
+    keys:
+    - sales_channel
+  depends_on:
+  - foundation
+  reads:
+  - silver.orders
+  - silver.order_items
+  dialect_notes:
+  - Decimal order totals; MEDIAN and PERCENTILE_CONT(0.9) use linear interpolation and truncate to input
+    scale 2, not binary float rounding. Group by channel.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: payment_mix
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/payment_mix/etl.sql
+  - legacy/redshift/units/payment_mix/report.sql
+  outputs:
+  - table: gold.payment_mix
+    golden: outputs/D0/payment_mix/payment_mix.csv
+    keys:
+    - method
+  - table: gold.report_payment_mix
+    golden: outputs/D0/payment_mix/report.csv
+    keys:
+    - method_family
+  depends_on:
+  - foundation
+  reads:
+  - silver.payments
+  dialect_notes:
+  - Group raw nullable method before NVL display unknown; DECODE family and NVL2 captured/missing. Empty
+    strings are not NULL. Decimal amount SUM; amount_share truncates to scale 4.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: returns_rate
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/returns_rate/etl.sql
+  - legacy/redshift/units/returns_rate/report.sql
+  outputs:
+  - table: gold.returns_rate
+    golden: outputs/D0/returns_rate/returns_rate.csv
+    keys:
+    - category
+  - table: gold.report_returns_rate
+    golden: outputs/D0/returns_rate/report.csv
+    keys:
+    - category
+  depends_on:
+  - foundation
+  reads:
+  - silver.order_items
+  - silver.products
+  - silver.returns
+  dialect_notes:
+  - Preserve item-to-returns LEFT JOIN cardinality, BIGINT sums and zero returned quantity fallback. return_rate_int
+    uses truncating integer division; explicit NUMERIC(14,4) quotient truncates at scale 15 before *100.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: attribution
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/attribution/etl.sql
+  - legacy/redshift/units/attribution/report.sql
+  outputs:
+  - table: gold.attribution
+    golden: outputs/D0/attribution/attribution.csv
+    keys:
+    - campaign_id
+    - touch_channel
+  - table: gold.report_attribution
+    golden: outputs/D0/attribution/report.csv
+    keys:
+    - campaign_id
+  depends_on:
+  - foundation
+  reads:
+  - silver.campaign_touches
+  dialect_notes:
+  - SUPER touches uses inner explode, not explode_outer. Cast campaign/channel to VARCHAR(16) semantics;
+    count touches and distinct customer ids. Report SUMs per-channel reach.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: inventory_snapshot
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/inventory_snapshot/etl.sql
+  - legacy/redshift/units/inventory_snapshot/report.sql
+  outputs:
+  - table: gold.inventory_snapshot
+    golden: outputs/D0/inventory_snapshot/inventory_snapshot.csv
+    keys:
+    - product_id
+  - table: gold.report_inventory_snapshot
+    golden: outputs/D0/inventory_snapshot/report.csv
+    keys:
+    - product_id
+  depends_on:
+  - foundation
+  reads:
+  - silver.products
+  - silver.order_items
+  dialect_notes:
+  - D0 drops/recreates table before procedure; use full replacement, not incremental retained state. All
+    products LEFT JOIN summed sales; zero fallback; GREATEST(500-units,0)::INT. Fixed snapshot 2025-12-31.
+    Report on_hand ASC, product_id LIMIT 50.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: finance_export
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/finance_export/etl.sql
+  - legacy/redshift/units/finance_export/report.sql
+  outputs:
+  - table: gold.finance_monthly
+    golden: outputs/D0/finance_export/finance_monthly.csv
+    keys:
+    - month
+  - table: gold.report_finance_export
+    golden: outputs/D0/finance_export/report.csv
+    keys:
+    - fiscal_year
+    - fiscal_qtr
+  depends_on:
+  - foundation
+  reads:
+  - silver.orders
+  - silver.order_items
+  dialect_notes:
+  - 'Month-start DATE and February-based fiscal year. Inline f_fiscal_qtr exactly: concat(''Q'', cast((((month(d)+9)%12)
+    DIV 3)+1 as string)); no floating division. Report groups fiscal_year,fiscal_qtr. UNLOAD has no golden
+    and is excluded.'
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: cohort_retention
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/units/cohort_retention/etl.sql
+  - legacy/redshift/units/cohort_retention/report.sql
+  outputs:
+  - table: gold.cohort_retention
+    golden: outputs/D0/cohort_retention/cohort_retention.csv
+    keys:
+    - cohort_month
+    - month_offset
+  - table: gold.report_cohort_retention
+    golden: outputs/D0/cohort_retention/report.csv
+    keys:
+    - cohort_month
+    - month_offset
+  depends_on:
+  - foundation
+  reads:
+  - silver.orders
+  dialect_notes:
+  - Replace session temp-table steps with equivalent CTEs. First-order-month cohorts; month differences
+    count calendar boundaries; distinct active buyers; emit observed offsets only. Report ROUND(100.0*active_buyers/cohort_size,2)
+    uses decimal half-away-from-zero.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
+- name: orchestration
+  layer: gold
+  legacy_sources:
+  - legacy/redshift/99_orchestration/exec_summary/etl.sql
+  - legacy/redshift/99_orchestration/exec_summary/report.sql
+  outputs:
+  - table: gold.exec_summary
+    golden: outputs/D0/orchestration/exec_summary.csv
+    keys:
+    - snapshot_label
+  - table: gold.report_orchestration
+    golden: outputs/D0/orchestration/report.csv
+    keys:
+    - snapshot_label
+  depends_on:
+  - daily_revenue
+  - customer_ltv
+  - returns_rate
+  - shipping_sla
+  reads:
+  - gold.daily_revenue
+  - gold.customer_ltv
+  - gold.returns_rate
+  - gold.shipping_sla
+  dialect_notes:
+  - Read four published Gold marts, not raw recomputation. Anchor label/date 2025-12-31. AVG LTV truncates
+    scale 2; return quotient scale 15 before *100; delivered-weighted average of published carrier averages
+    truncates quotient scale 4. Scheduler is not a data dependency.
+  - 'Keep exact decimal scales and truncating integer division where used; do not introduce rounding.
+    Preserve NULL versus empty string and CHAR padding. Date differences count source calendar boundaries,
+    not elapsed durations. Source sessions are UTC: timestamps are timezone-naive; reused output CSV uses
+    datetime.isoformat, inputs use YYYY-MM-DD HH:MM:SS[.ffffff]. NULL is \N, never an empty string. Match
+    output columns and types from manifest; no nondeterministic columns.'
