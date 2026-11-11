@@ -1,0 +1,8 @@
+name: silver_shipments
+layer: silver
+sql:
+  - shipments.sql
+outputs:
+  - table: silver.shipments
+    golden: outputs/D0/foundation/shipments.csv
+    keys: [shipment_id]
