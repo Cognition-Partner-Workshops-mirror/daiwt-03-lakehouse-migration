@@ -1,0 +1,12 @@
+name: store_weekly
+layer: gold
+sql:
+  - store_weekly.sql
+  - report.sql
+outputs:
+  - table: gold.store_weekly
+    golden: outputs/D0/store_weekly/store_weekly.csv
+    keys: [store_id, week_start]
+  - table: gold.store_weekly_report
+    golden: outputs/D0/store_weekly/report.csv
+    keys: [store_id]
