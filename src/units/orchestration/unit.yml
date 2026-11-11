@@ -1,0 +1,12 @@
+name: orchestration
+layer: gold
+sql:
+  - 01_exec_summary.sql
+  - 02_report.sql
+outputs:
+  - table: gold.exec_summary
+    golden: outputs/D0/orchestration/exec_summary.csv
+    keys: [snapshot_label]
+  - table: gold.report_orchestration
+    golden: outputs/D0/orchestration/report.csv
+    keys: [snapshot_label]
