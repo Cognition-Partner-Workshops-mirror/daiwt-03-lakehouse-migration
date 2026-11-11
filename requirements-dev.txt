@@ -1,2 +1,2 @@
--e .migration/framework
+.migration/framework
 pytest>=8,<10

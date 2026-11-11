@@ -26,6 +26,9 @@ def brief(unit):
         f"Use the `dbx-migrate-unit` skill to migrate unit `{unit['name']}` in {REPO}.\n"
         f"Unit plan (from docs/units.yml):\n{json.dumps(unit, sort_keys=True, indent=2)}\n"
         "Touch only src/units/<unit>/. No Databricks deploys or job runs. "
+        "Do not wait for upstream units or merges: fetch-goldens --units <unit> and "
+        "check --units <unit> use manifest table mappings for upstream output goldens, "
+        "even when no upstream unit directory exists. "
         "Merge your PR as soon as the `pr` workflow is green. Report the structured output."
     )
 

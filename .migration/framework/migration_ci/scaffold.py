@@ -113,6 +113,11 @@ def sync(target):
     directory.mkdir(parents=True, exist_ok=True)
     for name, data in workflows().items():
         (directory / f'{name}.yml').write_text(yaml.safe_dump(data, sort_keys=False))
+    requirements = target / 'requirements-dev.txt'
+    content = requirements.read_text() if requirements.exists() else '.migration/framework\npytest>=8,<10\n'
+    editable = ('-e .migration/framework', '--editable .migration/framework')
+    requirements.write_text(''.join('.migration/framework\n' if line.strip() in editable else line
+                                    for line in content.splitlines(keepends=True)))
 
 
 def init(config_file, target):
@@ -125,7 +130,6 @@ def init(config_file, target):
     (target / 'src/units').mkdir(parents=True)
     (target / 'tests').mkdir()
     (target / 'pytest.ini').write_text('[pytest]\ntestpaths = tests\n')
-    (target / 'requirements-dev.txt').write_text('-e .migration/framework\npytest>=8,<10\n')
     (target / 'tests/conftest.py').write_text(
         'def pytest_addoption(parser):\n    parser.addoption("--goldens", default=None)\n')
     (target / 'tests/test_units.py').write_text(

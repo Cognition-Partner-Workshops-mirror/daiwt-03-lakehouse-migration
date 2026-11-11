@@ -77,6 +77,12 @@ def needed(manifest, units, selected, drop):
     available = entries(manifest, drop)
     by_path = {e['path']: e for e in available}
     by_table = {input_table(e): e for e in input_entries(available)}
+    for entry in available:
+        if entry['path'].startswith('outputs/') and entry.get('table'):
+            table = entry['table']
+            if table in by_table:
+                raise ValueError(f'Multiple goldens map to {table} in {drop}')
+            by_table[table] = entry
     for unit in units.values():
         for output in unit['outputs']:
             path = output_path(output, drop)
