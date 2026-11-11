@@ -1,0 +1,12 @@
+name: churn_flags
+layer: gold
+sql:
+  - 01_churn_flags.sql
+  - 02_report.sql
+outputs:
+  - table: gold.churn_flags
+    golden: outputs/D0/churn_flags/churn_flags.csv
+    keys: [customer_id]
+  - table: gold.report_churn_flags
+    golden: outputs/D0/churn_flags/report.csv
+    keys: [churn_flag]
