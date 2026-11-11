@@ -1,0 +1,12 @@
+name: shipping_sla
+layer: gold
+sql:
+  - 01_shipping_sla.sql
+  - 02_report_shipping_sla.sql
+outputs:
+  - table: gold.shipping_sla
+    golden: outputs/D0/shipping_sla/shipping_sla.csv
+    keys: [carrier]
+  - table: gold.report_shipping_sla
+    golden: outputs/D0/shipping_sla/report.csv
+    keys: [carrier]
