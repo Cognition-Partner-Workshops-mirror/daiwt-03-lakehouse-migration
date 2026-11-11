@@ -1,0 +1,12 @@
+name: attribution
+layer: gold
+sql:
+  - 01_attribution.sql
+  - 02_report.sql
+outputs:
+  - table: gold.attribution
+    golden: outputs/D0/attribution/attribution.csv
+    keys: [campaign_id, touch_channel]
+  - table: gold.report_attribution
+    golden: outputs/D0/attribution/report.csv
+    keys: [campaign_id]
