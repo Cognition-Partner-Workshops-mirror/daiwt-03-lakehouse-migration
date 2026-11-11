@@ -1,0 +1,8 @@
+name: silver_stores
+layer: silver
+sql:
+  - 01_stores.sql
+outputs:
+  - table: silver.stores
+    golden: outputs/D0/foundation/stores.csv
+    keys: [store_id]
