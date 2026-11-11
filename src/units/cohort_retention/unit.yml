@@ -1,0 +1,12 @@
+name: cohort_retention
+layer: gold
+sql:
+  - etl.sql
+  - report.sql
+outputs:
+  - table: gold.cohort_retention
+    golden: outputs/D0/cohort_retention/cohort_retention.csv
+    keys: [cohort_month, month_offset]
+  - table: gold.cohort_retention_report
+    golden: outputs/D0/cohort_retention/report.csv
+    keys: [cohort_month, month_offset]
