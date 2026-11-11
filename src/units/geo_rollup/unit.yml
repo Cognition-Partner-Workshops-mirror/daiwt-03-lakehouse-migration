@@ -1,0 +1,12 @@
+name: geo_rollup
+layer: gold
+sql:
+  - geo_rollup.sql
+  - geo_rollup_report.sql
+outputs:
+  - table: gold.geo_rollup
+    golden: outputs/D0/geo_rollup/geo_rollup.csv
+    keys: [grouping_id, region, state]
+  - table: gold.geo_rollup_report
+    golden: outputs/D0/geo_rollup/report.csv
+    keys: [grouping_id, region, state]
