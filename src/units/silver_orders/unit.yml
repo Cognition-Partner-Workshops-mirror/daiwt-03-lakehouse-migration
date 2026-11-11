@@ -1,8 +1,0 @@
-name: silver_orders
-layer: silver
-sql:
-  - orders.sql
-outputs:
-  - table: silver.orders
-    golden: outputs/D0/foundation/orders.csv
-    keys: [order_id]
