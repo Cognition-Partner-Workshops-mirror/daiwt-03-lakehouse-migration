@@ -1,0 +1,9 @@
+name: silver_products
+layer: silver
+sql:
+  - 01_products.sql
+outputs:
+  - table: silver.products
+    golden: outputs/D0/foundation/products.csv
+    keys:
+      - product_id
