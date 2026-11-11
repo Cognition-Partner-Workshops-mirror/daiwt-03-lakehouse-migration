@@ -1,0 +1,12 @@
+name: shipping_sla
+layer: gold
+sql:
+  - etl.sql
+  - report.sql
+outputs:
+  - table: gold.shipping_sla
+    golden: outputs/D0/shipping_sla/shipping_sla.csv
+    keys: [carrier]
+  - table: gold.shipping_sla_report
+    golden: outputs/D0/shipping_sla/report.csv
+    keys: [carrier]
