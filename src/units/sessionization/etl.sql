@@ -1,0 +1,48 @@
+CREATE OR REPLACE TABLE IDENTIFIER(:catalog || '.' || :gold_schema || '.web_sessions')
+USING DELTA
+AS
+WITH ordered AS (
+    SELECT customer_id,
+           event_id,
+           event_ts,
+           event_type,
+           LAG(event_ts) OVER (
+               PARTITION BY customer_id ORDER BY event_ts, event_id
+           ) AS previous_event_ts
+    FROM IDENTIFIER(:catalog || '.' || :silver_schema || '.web_events')
+    WHERE customer_id IS NOT NULL
+),
+flagged AS (
+    SELECT customer_id,
+           event_id,
+           event_ts,
+           event_type,
+           CASE
+               WHEN previous_event_ts IS NULL THEN 1
+               -- Count second boundaries, including fractional timestamp gaps.
+               WHEN TIMESTAMPDIFF(SECOND,
+                       DATE_TRUNC('SECOND', previous_event_ts),
+                       DATE_TRUNC('SECOND', event_ts)) > 1800 THEN 1
+               ELSE 0
+           END AS new_session
+    FROM ordered
+),
+numbered AS (
+    SELECT customer_id,
+           event_id,
+           event_ts,
+           event_type,
+           SUM(new_session) OVER (
+               PARTITION BY customer_id ORDER BY event_ts, event_id
+               ROWS UNBOUNDED PRECEDING
+           ) AS session_id
+    FROM flagged
+)
+SELECT CAST(customer_id AS BIGINT) AS customer_id,
+       CAST(session_id AS BIGINT) AS session_id,
+       CAST(MIN(event_ts) AS TIMESTAMP_NTZ) AS session_start_ts,
+       CAST(MAX(event_ts) AS TIMESTAMP_NTZ) AS session_end_ts,
+       CAST(COUNT(*) AS BIGINT) AS event_count,
+       CAST(SUM(CASE WHEN event_type = 'checkout' THEN 1 ELSE 0 END) AS BIGINT) AS checkout_events
+FROM numbered
+GROUP BY customer_id, session_id;
