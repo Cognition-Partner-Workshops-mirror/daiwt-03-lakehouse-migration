@@ -18,13 +18,13 @@ tiles AS (
            NTILE(5) OVER (ORDER BY monetary DESC NULLS FIRST, customer_id) AS m_tile
     FROM metrics
 )
-SELECT CAST(customer_id AS INT) AS customer_id,
-       CAST(recency_days AS INT) AS recency_days,
+SELECT CAST(customer_id AS BIGINT) AS customer_id,
+       CAST(recency_days AS BIGINT) AS recency_days,
        CAST(frequency AS BIGINT) AS frequency,
        CAST(monetary AS DECIMAL(38,2)) AS monetary,
-       CAST(r_tile AS INT) AS r_tile,
-       CAST(f_tile AS INT) AS f_tile,
-       CAST(m_tile AS INT) AS m_tile,
+       CAST(r_tile AS BIGINT) AS r_tile,
+       CAST(f_tile AS BIGINT) AS f_tile,
+       CAST(m_tile AS BIGINT) AS m_tile,
        CAST(CONCAT(CAST(r_tile AS STRING), CAST(f_tile AS STRING), CAST(m_tile AS STRING)) AS STRING) AS rfm_segment
 FROM tiles
 ORDER BY customer_id;
