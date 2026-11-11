@@ -1,0 +1,8 @@
+name: silver_campaign_touches
+layer: silver
+sql:
+  - campaign_touches.sql
+outputs:
+  - table: silver.campaign_touches
+    golden: outputs/D0/foundation/campaign_touches.csv
+    keys: [touch_id]
