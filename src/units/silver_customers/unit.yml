@@ -1,8 +1,0 @@
-name: silver_customers
-layer: silver
-sql:
-  - customers.sql
-outputs:
-  - table: silver.customers
-    golden: outputs/D0/foundation/customers.csv
-    keys: [customer_id]
