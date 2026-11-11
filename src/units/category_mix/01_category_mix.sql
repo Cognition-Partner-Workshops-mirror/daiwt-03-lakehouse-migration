@@ -13,8 +13,9 @@ WITH category_totals AS (
     category,
     units_sold,
     revenue,
-    CAST(revenue * 100 AS BIGINT) AS numerator,
-    NULLIF(CAST(SUM(revenue) OVER () * 100 AS BIGINT), 0) AS denominator
+    CASE WHEN SIGN(revenue) * SIGN(SUM(revenue) OVER ()) < 0 THEN '-' ELSE '' END AS sign,
+    ABS(CAST(revenue * 100 AS BIGINT)) AS numerator,
+    NULLIF(ABS(CAST(SUM(revenue) OVER () * 100 AS BIGINT)), 0) AS denominator
   FROM category_totals
 ), d0 AS (
   SELECT *, numerator DIV denominator AS q0, numerator % denominator AS r0
@@ -44,6 +45,7 @@ SELECT
   revenue,
   CAST(
     CONCAT(
+      sign,
       CAST(q0 AS STRING),
       '.',
       LPAD(CAST(q1 AS STRING), 6, '0'),
