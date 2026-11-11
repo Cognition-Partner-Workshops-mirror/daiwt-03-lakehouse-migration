@@ -1,0 +1,8 @@
+name: silver_returns
+layer: silver
+sql:
+  - returns.sql
+outputs:
+  - table: silver.returns
+    golden: outputs/D0/foundation/returns.csv
+    keys: [return_id]
