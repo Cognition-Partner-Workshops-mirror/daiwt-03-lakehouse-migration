@@ -9,11 +9,11 @@ WITH per_store AS (
   GROUP BY oi.product_id, s.region
 ), ranked AS (
   SELECT product_id, region, units,
-    ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY units DESC, region ASC) AS rn
+    ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY units DESC, region ASC NULLS LAST) AS rn
   FROM per_store
 ), top_stores AS (
   SELECT product_id,
-    LISTAGG(rtrim(region), ',') WITHIN GROUP (ORDER BY units DESC, region ASC) AS codes
+    LISTAGG(rtrim(region), ',') WITHIN GROUP (ORDER BY units DESC, region ASC NULLS LAST) AS codes
   FROM ranked
   WHERE rn <= 3
   GROUP BY product_id
