@@ -1,0 +1,15 @@
+name: sessionization
+layer: gold
+sql:
+  - etl.sql
+  - report.sql
+outputs:
+  - table: gold.web_sessions
+    golden: outputs/D0/sessionization/web_sessions.csv
+    keys:
+      - customer_id
+      - session_id
+  - table: gold.report_sessionization
+    golden: outputs/D0/sessionization/report.csv
+    keys:
+      - customer_id

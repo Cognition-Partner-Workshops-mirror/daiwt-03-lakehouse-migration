@@ -1,0 +1,12 @@
+name: inventory_snapshot
+layer: gold
+sql:
+  - inventory_snapshot.sql
+  - report.sql
+outputs:
+  - table: gold.inventory_snapshot
+    golden: outputs/D0/inventory_snapshot/inventory_snapshot.csv
+    keys: [product_id]
+  - table: gold.report_inventory_snapshot
+    golden: outputs/D0/inventory_snapshot/report.csv
+    keys: [product_id]
