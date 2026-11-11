@@ -1,8 +1,0 @@
-name: silver_payments
-layer: silver
-sql:
-  - payments.sql
-outputs:
-  - table: silver.payments
-    golden: outputs/D0/foundation/payments.csv
-    keys: [payment_id]
