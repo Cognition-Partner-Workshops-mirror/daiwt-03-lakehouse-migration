@@ -1,0 +1,12 @@
+name: customer_ltv
+layer: gold
+sql:
+  - etl.sql
+  - report.sql
+outputs:
+  - table: gold.customer_ltv
+    golden: outputs/D0/customer_ltv/customer_ltv.csv
+    keys: [customer_id]
+  - table: gold.customer_ltv_report
+    golden: outputs/D0/customer_ltv/report.csv
+    keys: [region]
